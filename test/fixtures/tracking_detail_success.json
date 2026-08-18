@@ -1,0 +1,58 @@
+{
+  "trackingNumber": "9400111899562537624656",
+  "status": "Delivered",
+  "statusCategory": "DELIVERED",
+  "statusSummary": "Your item was delivered in or at the mailbox at 1:45 pm on August 18 in AUSTIN, TX 78701.",
+  "expectedDeliveryDate": "2026-08-18",
+  "expectedDeliveryTime": "13:45:00",
+  "guaranteedDeliveryDate": "2026-08-18",
+  "destinationCity": "AUSTIN",
+  "destinationState": "TX",
+  "destinationZIP": "78701",
+  "originCity": "WASHINGTON",
+  "originState": "DC",
+  "originZIP": "20260",
+  "mailClass": "PRIORITY_MAIL",
+  "serviceTypeCode": "001",
+  "trackingEvents": [
+    {
+      "eventType": "Delivered",
+      "eventTimestamp": "2026-08-18T13:45:00Z",
+      "eventCountry": "USA",
+      "eventCity": "AUSTIN",
+      "eventState": "TX",
+      "eventZIP": "78701",
+      "eventCode": "01",
+      "name": "J DOE",
+      "firm": null,
+      "authorizedAgent": false,
+      "eventDescription": "Delivered, In/At Mailbox"
+    },
+    {
+      "eventType": "Out for Delivery",
+      "eventTimestamp": "2026-08-18T08:15:00Z",
+      "eventCountry": "USA",
+      "eventCity": "AUSTIN",
+      "eventState": "TX",
+      "eventZIP": "78701",
+      "eventCode": "OF",
+      "name": null,
+      "firm": null,
+      "authorizedAgent": false,
+      "eventDescription": "Out for Delivery"
+    },
+    {
+      "eventType": "Arrived at Post Office",
+      "eventTimestamp": "2026-08-18T05:30:00Z",
+      "eventCountry": "USA",
+      "eventCity": "AUSTIN",
+      "eventState": "TX",
+      "eventZIP": "78701",
+      "eventCode": "07",
+      "name": null,
+      "firm": null,
+      "authorizedAgent": false,
+      "eventDescription": "Arrived at USPS Facility"
+    }
+  ]
+}
