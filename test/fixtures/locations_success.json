@@ -1,0 +1,20 @@
+{
+  "totalLocations": 1,
+  "locations": [
+    {
+      "locationId": "1370258",
+      "locationName": "L'ENFANT PLAZA POST OFFICE",
+      "locationType": "POST OFFICE",
+      "streetAddress": "475 L'ENFANT PLZ SW RM 100",
+      "city": "WASHINGTON",
+      "state": "DC",
+      "ZIPCode": "20260",
+      "ZIPPlus4": "9998",
+      "phone": "202-268-2000",
+      "latitude": 38.884,
+      "longitude": -77.018,
+      "distance": 0.1,
+      "services": ["Passport Services", "Money Orders", "PO Box Rentals"]
+    }
+  ]
+}

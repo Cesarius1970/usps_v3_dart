@@ -1,0 +1,24 @@
+{
+  "totalBasePrice": 9.65,
+  "rates": [
+    {
+      "mailClass": "PRIORITY_MAIL",
+      "price": 9.65,
+      "zone": "04",
+      "description": "Priority Mail 2-Day",
+      "fees": [
+        {
+          "feeName": "Base Rate",
+          "feePrice": 9.65
+        }
+      ]
+    },
+    {
+      "mailClass": "PRIORITY_MAIL_EXPRESS",
+      "price": 28.75,
+      "zone": "04",
+      "description": "Priority Mail Express 1-Day",
+      "fees": []
+    }
+  ]
+}

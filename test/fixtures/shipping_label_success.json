@@ -1,0 +1,7 @@
+{
+  "trackingNumber": "9405511899562537620001",
+  "totalPrice": 9.65,
+  "labelBrokerId": "LBRK123456",
+  "labelImageBase64": "JVBERi0xLjQKJcOkw7zDtsOfCDCxMjM0NTY3ODkw...",
+  "labelUrl": "https://api.usps.com/labels/v3/download/9405511899562537620001.pdf"
+}
