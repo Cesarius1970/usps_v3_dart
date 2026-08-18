@@ -1,0 +1,7 @@
+{
+  "access_token": "mock_usps_bearer_token_xyz_123",
+  "token_type": "Bearer",
+  "expires_in": 28799,
+  "status": "approved",
+  "scope": "tracking addresses locations pricing shipping"
+}
