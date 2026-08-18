@@ -70,10 +70,7 @@ class UspsClient {
 
     // Attach OAuth token interceptor to automatically sign requests and handle 401s
     httpClient.addInterceptor(
-      UspsAuthInterceptor(
-        authManager: authManager,
-        dio: httpClient.dio,
-      ),
+      UspsAuthInterceptor(authManager: authManager, dio: httpClient.dio),
     );
 
     return UspsClient._(
