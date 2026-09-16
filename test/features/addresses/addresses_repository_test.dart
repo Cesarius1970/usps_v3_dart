@@ -37,7 +37,7 @@ void main() {
   });
 
   group('AddressesRepository standardizeAddress', () {
-    test('successfully standardizes address and parses ZIP+4', () async {
+    test('successfully standardizes address and parses ZIP+4 with full fields', () async {
       when(
         () => mockHttpClient.get<dynamic>(
           '/addresses/v3/address',
@@ -57,6 +57,9 @@ void main() {
         city: 'Washington',
         state: 'DC',
         zipCode: '20260',
+        zipPlus4: '0001',
+        firmName: 'USPS HQ',
+        urbanization: 'URB',
       );
 
       final result = await repository.standardizeAddress(input);
@@ -68,6 +71,30 @@ void main() {
       expect(result.address?.zipCode, equals('20260'));
       expect(result.address?.zipPlus4, equals('0001'));
       expect(result.warnings, contains('Default address line 2 normalized'));
+    });
+
+    test('handles flat address response without wrapping address key', () async {
+      when(
+        () => mockHttpClient.get<dynamic>(
+          '/addresses/v3/address',
+          queryParameters: any(named: 'queryParameters'),
+        ),
+      ).thenAnswer(
+        (_) async => Response(
+          data: {
+            'streetAddress': '123 MAIN ST',
+            'city': 'AUSTIN',
+            'state': 'TX',
+            'ZIPCode': '78701',
+          },
+          statusCode: 200,
+          requestOptions: RequestOptions(path: '/addresses/v3/address'),
+        ),
+      );
+
+      final result = await repository.standardizeAddress(const Address(streetAddress: '123 Main St'));
+      expect(result.address?.streetAddress, equals('123 MAIN ST'));
+      expect(result.address?.city, equals('AUSTIN'));
     });
 
     test('throws UspsUnknownException on invalid payload format', () async {
@@ -114,10 +141,27 @@ void main() {
       expect(result.city, equals('WASHINGTON'));
       expect(result.state, equals('DC'));
     });
+
+    test('throws UspsUnknownException when payload is not a Map', () async {
+      when(
+        () => mockHttpClient.get<dynamic>(
+          '/addresses/v3/city-state',
+          queryParameters: {'ZIPCode': '20260'},
+        ),
+      ).thenAnswer(
+        (_) async => Response(
+          data: ['unexpected_list'],
+          statusCode: 200,
+          requestOptions: RequestOptions(path: '/addresses/v3/city-state'),
+        ),
+      );
+
+      expect(() => repository.lookupCityState('20260'), throwsA(isA<UspsUnknownException>()));
+    });
   });
 
   group('AddressesRepository lookupZipCode', () {
-    test('successfully looks up full zip code', () async {
+    test('successfully looks up full zip code with all address parameters', () async {
       when(
         () => mockHttpClient.get<dynamic>(
           '/addresses/v3/zipcode',
@@ -134,13 +178,62 @@ void main() {
       final result = await repository.lookupZipCode(
         const Address(
           streetAddress: '475 L\'Enfant Plaza SW',
+          secondaryAddress: 'STE 100',
           city: 'Washington',
           state: 'DC',
+          firmName: 'HQ',
         ),
       );
 
       expect(result.address?.zipCode, equals('20260'));
       expect(result.address?.zipPlus4, equals('0001'));
+    });
+
+    test('handles flat address response in lookupZipCode', () async {
+      when(
+        () => mockHttpClient.get<dynamic>(
+          '/addresses/v3/zipcode',
+          queryParameters: any(named: 'queryParameters'),
+        ),
+      ).thenAnswer(
+        (_) async => Response(
+          data: {
+            'streetAddress': '475 L\'ENFANT PLZ SW',
+            'city': 'WASHINGTON',
+            'state': 'DC',
+            'ZIPCode': '20260',
+            'ZIPPlus4': '0001',
+          },
+          statusCode: 200,
+          requestOptions: RequestOptions(path: '/addresses/v3/zipcode'),
+        ),
+      );
+
+      final result = await repository.lookupZipCode(
+        const Address(streetAddress: '475 L\'Enfant Plaza SW', city: 'Washington', state: 'DC'),
+      );
+
+      expect(result.address?.zipCode, equals('20260'));
+    });
+
+    test('throws UspsUnknownException on invalid zipcode lookup response', () async {
+      when(
+        () => mockHttpClient.get<dynamic>(
+          '/addresses/v3/zipcode',
+          queryParameters: any(named: 'queryParameters'),
+        ),
+      ).thenAnswer(
+        (_) async => Response(
+          data: 12345,
+          statusCode: 200,
+          requestOptions: RequestOptions(path: '/addresses/v3/zipcode'),
+        ),
+      );
+
+      expect(
+        () => repository.lookupZipCode(const Address(streetAddress: '123 Main')),
+        throwsA(isA<UspsUnknownException>()),
+      );
     });
   });
 }

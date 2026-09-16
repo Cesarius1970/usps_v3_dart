@@ -28,7 +28,7 @@ void main() {
   });
 
   group('LocationsRepository findLocations', () {
-    test('successfully finds locations by zip code', () async {
+    test('successfully finds locations by zip code and radius', () async {
       when(
         () => mockHttpClient.get<dynamic>(
           '/locations/v3/locations',
@@ -44,6 +44,7 @@ void main() {
 
       final LocationsResponse response = await repository.findLocations(
         zipCode: '20260',
+        radius: 15.0,
         maxResults: 5,
       );
 
@@ -58,6 +59,32 @@ void main() {
       expect(loc.latitude, equals(38.884));
       expect(loc.longitude, equals(-77.018));
       expect(loc.services, contains('Passport Services'));
+    });
+
+    test('successfully parses raw List response format', () async {
+      when(
+        () => mockHttpClient.get<dynamic>(
+          '/locations/v3/locations',
+          queryParameters: any(named: 'queryParameters'),
+        ),
+      ).thenAnswer(
+        (_) async => Response(
+          data: [
+            {
+              'locationId': '101',
+              'locationName': 'DOWNTOWN STATION',
+              'city': 'AUSTIN',
+              'state': 'TX',
+            }
+          ],
+          statusCode: 200,
+          requestOptions: RequestOptions(path: '/locations/v3/locations'),
+        ),
+      );
+
+      final response = await repository.findLocations(zipCode: '78701');
+      expect(response.totalLocations, equals(1));
+      expect(response.locations.first.locationName, equals('DOWNTOWN STATION'));
     });
 
     test('successfully finds locations by coordinates', () async {
@@ -87,27 +114,24 @@ void main() {
       expect(response.locations.isNotEmpty, isTrue);
     });
 
-    test(
-      'throws UspsUnknownException on unexpected response data type',
-      () async {
-        when(
-          () => mockHttpClient.get<dynamic>(
-            '/locations/v3/locations',
-            queryParameters: any(named: 'queryParameters'),
-          ),
-        ).thenAnswer(
-          (_) async => Response(
-            data: 12345,
-            statusCode: 200,
-            requestOptions: RequestOptions(path: '/locations/v3/locations'),
-          ),
-        );
+    test('throws UspsUnknownException on unexpected response data type', () async {
+      when(
+        () => mockHttpClient.get<dynamic>(
+          '/locations/v3/locations',
+          queryParameters: any(named: 'queryParameters'),
+        ),
+      ).thenAnswer(
+        (_) async => Response(
+          data: 12345,
+          statusCode: 200,
+          requestOptions: RequestOptions(path: '/locations/v3/locations'),
+        ),
+      );
 
-        expect(
-          () => repository.findLocations(zipCode: '20260'),
-          throwsA(isA<UspsUnknownException>()),
-        );
-      },
-    );
+      expect(
+        () => repository.findLocations(zipCode: '20260'),
+        throwsA(isA<UspsUnknownException>()),
+      );
+    });
   });
 }

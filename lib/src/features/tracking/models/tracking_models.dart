@@ -62,7 +62,7 @@ class TrackingEvent {
 }
 
 /// Represents the complete tracking information for a USPS package.
-@JsonSerializable()
+@JsonSerializable(explicitToJson: true)
 class TrackingResponse {
   /// The USPS tracking number / barcode.
   final String trackingNumber;

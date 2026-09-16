@@ -43,9 +43,11 @@ AddressResponse _$AddressResponseFromJson(Map<String, dynamic> json) =>
 
 Map<String, dynamic> _$AddressResponseToJson(AddressResponse instance) =>
     <String, dynamic>{
-      'address': instance.address,
+      'address': instance.address?.toJson(),
       'warnings': instance.warnings,
-      'additionalMatches': instance.additionalMatches,
+      'additionalMatches': instance.additionalMatches
+          ?.map((e) => e.toJson())
+          .toList(),
     };
 
 CityStateLookup _$CityStateLookupFromJson(Map<String, dynamic> json) =>

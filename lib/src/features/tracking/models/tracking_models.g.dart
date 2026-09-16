@@ -77,5 +77,5 @@ Map<String, dynamic> _$TrackingResponseToJson(TrackingResponse instance) =>
       'originZIP': instance.originZIP,
       'mailClass': instance.mailClass,
       'serviceTypeCode': instance.serviceTypeCode,
-      'trackingEvents': instance.trackingEvents,
+      'trackingEvents': instance.trackingEvents.map((e) => e.toJson()).toList(),
     };

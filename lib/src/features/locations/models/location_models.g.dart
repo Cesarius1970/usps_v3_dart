@@ -55,6 +55,6 @@ LocationsResponse _$LocationsResponseFromJson(Map<String, dynamic> json) =>
 
 Map<String, dynamic> _$LocationsResponseToJson(LocationsResponse instance) =>
     <String, dynamic>{
-      'locations': instance.locations,
+      'locations': instance.locations.map((e) => e.toJson()).toList(),
       'totalLocations': instance.totalLocations,
     };

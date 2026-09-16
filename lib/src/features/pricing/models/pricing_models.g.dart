@@ -73,5 +73,5 @@ RateResponse _$RateResponseFromJson(Map<String, dynamic> json) => RateResponse(
 Map<String, dynamic> _$RateResponseToJson(RateResponse instance) =>
     <String, dynamic>{
       'totalBasePrice': instance.totalBasePrice,
-      'rates': instance.rates,
+      'rates': instance.rates.map((e) => e.toJson()).toList(),
     };

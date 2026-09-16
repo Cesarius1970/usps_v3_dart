@@ -174,6 +174,24 @@ Para añadir un nuevo dominio (por ejemplo, **Carrier Pickup API** para recolecc
 
 ---
 
-## 6. Mantenimiento del Manual
+## 6. Estrategia de Pruebas y Cobertura (100%)
 
-Cualquier cambio que modifique las firmas de los métodos públicos, altere el comportamiento del interceptor de autenticación o agregue un nuevo repositorio debe registrarse de inmediato en las secciones correspondientes de este manual.
+El paquete implementa una suite completa de pruebas unitarias y de integración que alcanza el **100.00% de cobertura de líneas** sobre todo el código ejecutable de `lib/`.
+
+### 6.1. Organización de Tests
+- `test/core/`: Pruebas de excepciones (`UspsException`), gestor OAuth 2.0 (`UspsAuthManager`), interceptores Dio (`UspsAuthInterceptor`), y cliente HTTP (`UspsHttpClient`).
+- `test/features/`: Pruebas exhaustivas para cada repositorio (`AddressesRepository`, `LocationsRepository`, `PricingRepository`, `ShippingRepository`, `TrackingRepository`) simulando respuestas 200, 400, 401 y excepciones de red mediante mocks de Dio (`MockHttpClientAdapter`).
+- `test/models/`: Pruebas de serialización y deserialización bidireccional (`toJson` y `fromJson`) para todos los modelos de datos generados.
+
+### 6.2. Verificación de Cobertura
+Para ejecutar la suite y auditar la cobertura completa:
+```bash
+dart test --coverage=coverage
+dart run coverage:format_coverage --lcov --in=coverage --out=coverage/lcov.info --packages=.dart_tool/package_config.json --report-on=lib
+```
+
+---
+
+## 7. Mantenimiento del Manual
+
+Cualquier cambio que modifique las firmas de los métodos públicos, altere el comportamiento del interceptor de autenticación, incorpore dependencias o agregue un nuevo repositorio debe registrarse de inmediato en las secciones correspondientes de este manual.

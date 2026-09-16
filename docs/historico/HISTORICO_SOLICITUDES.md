@@ -115,3 +115,25 @@ Este documento registra de forma cronológica, numerada y secuencial todas las s
   - Creación de `docs/MANUAL_TECNICO.md` documentando la arquitectura integral, algoritmos de autenticación, control de concurrencia, interceptores y repositorios.
   - Establecimiento y formalización de la regla de Git (Conventional Commits y convención de ramas) en `docs/REGLAS_PROYECTO.md` y en la documentación técnica.
   - Ejecución del commit Git correspondiente siguiendo el estándar acordado.
+
+---
+
+### Interacción 9: Buenas Prácticas Dart/Google, Actualización de Dependencias y Cobertura de Tests al 100%
+- **Fecha:** 2026-09-15T19:50:00-05:00
+- **Solicitud del Usuario:**
+  > "Revisa el codigo de la libreria que cumpla los best practices de Dart y Google. Actualiza las dependencias en @pubspec.yaml y añadele comentarios pertinentes segun las mejores practicas del equipo Dart/Flutter. Asegura los test y la cobertura del 100%"
+- **Respuesta y Acciones:**
+  - **Revisión y Refactorización de Buenas Prácticas:**
+    - Se aplicaron las directrices de documentación oficial de Dart (*Effective Dart*): uso de frases sustantivas para propiedades/getters, oraciones que inician con "Whether" para booleanos, verbos en tercera persona en presente de indicativo para métodos/funciones, eliminación de etiquetas redundantes y mención fluida de parámetros en la prosa.
+    - Se agregaron comentarios estructurados por secciones en [`pubspec.yaml`](file:///home/cesar/Proyectos/Dart/usps_v3_dart/pubspec.yaml) categorizando dependencias de red/core y herramientas de desarrollo/generación de código.
+    - Actualización de versiones de dependencias a las más recientes (`dio: ^5.11.1`, `coverage: ^1.15.0`, `build_runner: ^2.16.1`, `test: ^1.32.0`).
+    - Se configuró `explicitToJson: true` en todas las anotaciones `@JsonSerializable()` de modelos anidados para garantizar serialización recursiva consistente en mapas JSON.
+    - Se agregó `coverage/` al archivo [`.gitignore`](file:///home/cesar/Proyectos/Dart/usps_v3_dart/.gitignore) según las convenciones estándar de Dart.
+  - **Pruebas y Cobertura al 100%:**
+    - Se crearon pruebas de serialización y deserialización exhaustivas en [`test/models/models_serialization_test.dart`](file:///home/cesar/Proyectos/Dart/usps_v3_dart/test/models/models_serialization_test.dart).
+    - Se expandieron las pruebas unitarias existentes en `core/` y `features/` para cubrir todas las ramas condicionales de error, cancelaciones, timeouts, tokens nulos y respuestas anómalas.
+    - Se alcanzaron **76 pruebas pasando satisfactoriamente**, logrando un **100.00% de cobertura de código (595/595 líneas ejecutables)** en todos los archivos de `lib/`.
+    - `dart analyze .` verificado con 0 advertencias o errores (`No issues found!`).
+  - **Mantenimiento y Control de Versiones:**
+    - Actualización de [`docs/MANUAL_TECNICO.md`](file:///home/cesar/Proyectos/Dart/usps_v3_dart/docs/MANUAL_TECNICO.md) con la sección de estrategia de testing y cobertura.
+    - Generación de commit siguiendo Conventional Commits (`chore(deps): update dependencies, refine doc comments, and achieve 100% test coverage`) y sincronización en GitHub.

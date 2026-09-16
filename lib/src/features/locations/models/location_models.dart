@@ -78,7 +78,7 @@ class UspsLocation {
 }
 
 /// Represents the search results from the USPS Locations API.
-@JsonSerializable()
+@JsonSerializable(explicitToJson: true)
 class LocationsResponse {
   /// List of locations matching the search criteria.
   final List<UspsLocation> locations;

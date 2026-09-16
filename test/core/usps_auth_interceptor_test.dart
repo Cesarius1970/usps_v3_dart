@@ -121,5 +121,24 @@ void main() {
       verifyNever(() => mockAuthManager.getValidToken(forceRefresh: true));
       verify(() => handler.next(error)).called(1);
     });
+
+    test('passes error down the chain if refreshing or retry fails during 401', () async {
+      final requestOptions = RequestOptions(path: '/v3/tracking/123');
+      final error = DioException(
+        requestOptions: requestOptions,
+        response: Response(statusCode: 401, requestOptions: requestOptions),
+      );
+
+      when(
+        () => mockAuthManager.getValidToken(forceRefresh: true),
+      ).thenThrow(Exception('Permanent auth failure'));
+
+      final handler = MockErrorInterceptorHandler();
+      interceptor.onError(error, handler);
+
+      await Future<void>.delayed(Duration.zero);
+
+      verify(() => handler.next(error)).called(1);
+    });
   });
 }

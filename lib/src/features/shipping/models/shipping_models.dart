@@ -5,7 +5,7 @@ import '../../addresses/models/address_models.dart';
 part 'shipping_models.g.dart';
 
 /// Request payload for generating domestic shipping labels with postage barcodes.
-@JsonSerializable(includeIfNull: false)
+@JsonSerializable(includeIfNull: false, explicitToJson: true)
 class LabelRequest {
   /// Shipper / sender address.
   final Address fromAddress;

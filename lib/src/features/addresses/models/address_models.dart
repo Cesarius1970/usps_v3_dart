@@ -54,7 +54,7 @@ class Address {
 }
 
 /// Represents the response received from the USPS Address Standardization API.
-@JsonSerializable()
+@JsonSerializable(explicitToJson: true)
 class AddressResponse {
   /// The normalized and standardized address returned by USPS.
   final Address? address;

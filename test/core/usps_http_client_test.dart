@@ -5,6 +5,7 @@ import 'package:usps_v3_dart/src/core/exceptions/usps_exceptions.dart';
 import 'package:usps_v3_dart/src/core/network/usps_http_client.dart';
 
 class MockDio extends Mock implements Dio {}
+class MockInterceptor extends Mock implements Interceptor {}
 
 void main() {
   late MockDio mockDio;
@@ -14,6 +15,20 @@ void main() {
     mockDio = MockDio();
     when(() => mockDio.interceptors).thenReturn(Interceptors());
     client = UspsHttpClient(dio: mockDio);
+  });
+
+  group('UspsHttpClient Initialization & Interceptors', () {
+    test('instantiates with default internal Dio when none provided', () {
+      final defaultClient = UspsHttpClient(baseUrl: 'https://api.usps.com');
+      expect(defaultClient.dio.options.baseUrl, equals('https://api.usps.com'));
+      expect(defaultClient.dio.options.headers['Content-Type'], equals('application/json'));
+    });
+
+    test('addInterceptor successfully registers an interceptor', () {
+      final interceptor = MockInterceptor();
+      client.addInterceptor(interceptor);
+      expect(client.dio.interceptors, contains(interceptor));
+    });
   });
 
   group('UspsHttpClient Successful Requests', () {
@@ -140,10 +155,95 @@ void main() {
       );
     });
 
-    test('maps 401 Unauthorized to UspsAuthException', () async {
-      when(() => mockDio.get<dynamic>(any())).thenThrow(
+    test('maps sendTimeout, receiveTimeout, and connectionError to UspsNetworkException', () async {
+      when(() => mockDio.get<dynamic>('/send')).thenThrow(
         DioException(
-          requestOptions: RequestOptions(path: '/protected'),
+          requestOptions: RequestOptions(path: '/send'),
+          type: DioExceptionType.sendTimeout,
+          message: 'Send timeout',
+        ),
+      );
+      when(() => mockDio.get<dynamic>('/receive')).thenThrow(
+        DioException(
+          requestOptions: RequestOptions(path: '/receive'),
+          type: DioExceptionType.receiveTimeout,
+          message: 'Receive timeout',
+        ),
+      );
+      when(() => mockDio.get<dynamic>('/conn')).thenThrow(
+        DioException(
+          requestOptions: RequestOptions(path: '/conn'),
+          type: DioExceptionType.connectionError,
+          message: 'Connection error',
+        ),
+      );
+
+      expect(() => client.get<dynamic>('/send'), throwsA(isA<UspsNetworkException>()));
+      expect(() => client.get<dynamic>('/receive'), throwsA(isA<UspsNetworkException>()));
+      expect(() => client.get<dynamic>('/conn'), throwsA(isA<UspsNetworkException>()));
+    });
+
+    test('maps cancel and badCertificate to UspsNetworkException', () async {
+      when(() => mockDio.get<dynamic>('/cancel')).thenThrow(
+        DioException(
+          requestOptions: RequestOptions(path: '/cancel'),
+          type: DioExceptionType.cancel,
+        ),
+      );
+      when(() => mockDio.get<dynamic>('/bad-cert')).thenThrow(
+        DioException(
+          requestOptions: RequestOptions(path: '/bad-cert'),
+          type: DioExceptionType.badCertificate,
+        ),
+      );
+
+      expect(
+        () => client.get<dynamic>('/cancel'),
+        throwsA(
+          isA<UspsNetworkException>().having(
+            (e) => e.message,
+            'message',
+            equals('Request was cancelled'),
+          ),
+        ),
+      );
+      expect(
+        () => client.get<dynamic>('/bad-cert'),
+        throwsA(
+          isA<UspsNetworkException>().having(
+            (e) => e.message,
+            'message',
+            equals('Bad SSL/TLS certificate'),
+          ),
+        ),
+      );
+    });
+
+    test('maps unknown DioException to UspsUnknownException', () async {
+      when(() => mockDio.get<dynamic>('/unknown')).thenThrow(
+        DioException(
+          requestOptions: RequestOptions(path: '/unknown'),
+          type: DioExceptionType.unknown,
+          message: 'Mystery error',
+        ),
+      );
+
+      expect(
+        () => client.get<dynamic>('/unknown'),
+        throwsA(
+          isA<UspsUnknownException>().having(
+            (e) => e.message,
+            'message',
+            equals('Mystery error'),
+          ),
+        ),
+      );
+    });
+
+    test('maps 401 and 403 to UspsAuthException', () async {
+      when(() => mockDio.get<dynamic>('/protected-401')).thenThrow(
+        DioException(
+          requestOptions: RequestOptions(path: '/protected-401'),
           type: DioExceptionType.badResponse,
           response: Response(
             statusCode: 401,
@@ -153,21 +253,42 @@ void main() {
                 'message': 'Invalid OAuth token',
               },
             },
-            requestOptions: RequestOptions(path: '/protected'),
+            requestOptions: RequestOptions(path: '/protected-401'),
+          ),
+        ),
+      );
+
+      when(() => mockDio.get<dynamic>('/protected-403')).thenThrow(
+        DioException(
+          requestOptions: RequestOptions(path: '/protected-403'),
+          type: DioExceptionType.badResponse,
+          response: Response(
+            statusCode: 403,
+            data: {
+              'error': {
+                'detail': 'Forbidden access',
+              },
+            },
+            requestOptions: RequestOptions(path: '/protected-403'),
           ),
         ),
       );
 
       expect(
-        () => client.get<dynamic>('/protected'),
+        () => client.get<dynamic>('/protected-401'),
         throwsA(
           isA<UspsAuthException>()
               .having((e) => e.statusCode, 'statusCode', equals(401))
-              .having(
-                (e) => e.message,
-                'message',
-                equals('Invalid OAuth token'),
-              ),
+              .having((e) => e.message, 'message', equals('Invalid OAuth token')),
+        ),
+      );
+
+      expect(
+        () => client.get<dynamic>('/protected-403'),
+        throwsA(
+          isA<UspsAuthException>()
+              .having((e) => e.statusCode, 'statusCode', equals(403))
+              .having((e) => e.message, 'message', equals('Forbidden access')),
         ),
       );
     });
@@ -204,7 +325,59 @@ void main() {
       );
     });
 
-    test('maps unexpected exceptions to UspsUnknownException', () async {
+    test('maps 400 with errors list having message and status keys', () async {
+      when(() => mockDio.get<dynamic>('/status-key')).thenThrow(
+        DioException(
+          requestOptions: RequestOptions(path: '/status-key'),
+          type: DioExceptionType.badResponse,
+          response: Response(
+            statusCode: 400,
+            data: {
+              'errors': [
+                {'message': 'Malformed parameter', 'status': '400_BAD'},
+              ],
+            },
+            requestOptions: RequestOptions(path: '/status-key'),
+          ),
+        ),
+      );
+
+      expect(
+        () => client.get<dynamic>('/status-key'),
+        throwsA(
+          isA<UspsApiException>()
+              .having((e) => e.errorCode, 'errorCode', equals('400_BAD'))
+              .having((e) => e.message, 'message', equals('Malformed parameter')),
+        ),
+      );
+    });
+
+    test('maps response with top-level message string to UspsApiException', () async {
+      when(() => mockDio.get<dynamic>('/msg-only')).thenThrow(
+        DioException(
+          requestOptions: RequestOptions(path: '/msg-only'),
+          type: DioExceptionType.badResponse,
+          response: Response(
+            statusCode: 500,
+            data: {'message': 'Internal USPS gateway failure'},
+            requestOptions: RequestOptions(path: '/msg-only'),
+          ),
+        ),
+      );
+
+      expect(
+        () => client.get<dynamic>('/msg-only'),
+        throwsA(
+          isA<UspsApiException>().having(
+            (e) => e.message,
+            'message',
+            equals('Internal USPS gateway failure'),
+          ),
+        ),
+      );
+    });
+
+    test('maps unexpected non-Dio exceptions to UspsUnknownException', () async {
       when(
         () => mockDio.get<dynamic>(any()),
       ).thenThrow(Exception('Unexpected system failure'));
@@ -212,6 +385,23 @@ void main() {
       expect(
         () => client.get<dynamic>('/crash'),
         throwsA(isA<UspsUnknownException>()),
+      );
+    });
+
+    test('rethrows existing UspsException directly without rewrapping', () async {
+      when(
+        () => mockDio.get<dynamic>(any()),
+      ).thenThrow(const UspsNetworkException(message: 'Already UspsException'));
+
+      expect(
+        () => client.get<dynamic>('/rethrow'),
+        throwsA(
+          isA<UspsNetworkException>().having(
+            (e) => e.message,
+            'message',
+            equals('Already UspsException'),
+          ),
+        ),
       );
     });
   });

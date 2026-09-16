@@ -68,35 +68,113 @@ void main() {
       expect(firstRate.fees?.first.feePrice, equals(9.65));
     });
 
-    test(
-      'throws UspsUnknownException on unexpected response data type',
-      () async {
-        when(
-          () => mockHttpClient.post<dynamic>(
-            '/prices/v3/base-rates/search',
-            data: any<dynamic>(named: 'data'),
-          ),
-        ).thenAnswer(
-          (_) async => Response(
-            data: 'malformed string',
-            statusCode: 200,
-            requestOptions: RequestOptions(
-              path: '/prices/v3/base-rates/search',
-            ),
-          ),
-        );
+    test('successfully parses alternative rateList JSON structure', () async {
+      when(
+        () => mockHttpClient.post<dynamic>(
+          '/prices/v3/base-rates/search',
+          data: any<dynamic>(named: 'data'),
+        ),
+      ).thenAnswer(
+        (_) async => Response(
+          data: {
+            'totalPrice': 15.50,
+            'rateList': [
+              {
+                'mailClass': 'PRIORITY_MAIL',
+                'price': 15.50,
+                'description': 'Priority Mail Express',
+              }
+            ],
+          },
+          statusCode: 200,
+          requestOptions: RequestOptions(path: '/prices/v3/base-rates/search'),
+        ),
+      );
 
-        expect(
-          () => repository.calculateRates(
-            const RateRequest(
-              originZipCode: '20260',
-              destinationZipCode: '78701',
-              weight: 1.0,
-            ),
+      final response = await repository.calculateRates(
+        const RateRequest(originZipCode: '10001', destinationZipCode: '90210', weight: 1.0),
+      );
+
+      expect(response.totalBasePrice, equals(15.50));
+      expect(response.rates.first.mailClass, equals('PRIORITY_MAIL'));
+    });
+
+    test('successfully parses raw List rate response', () async {
+      when(
+        () => mockHttpClient.post<dynamic>(
+          '/prices/v3/base-rates/search',
+          data: any<dynamic>(named: 'data'),
+        ),
+      ).thenAnswer(
+        (_) async => Response(
+          data: [
+            {
+              'mailClass': 'USPS_GROUND_ADVANTAGE',
+              'price': 6.20,
+              'description': 'USPS Ground Advantage',
+            }
+          ],
+          statusCode: 200,
+          requestOptions: RequestOptions(path: '/prices/v3/base-rates/search'),
+        ),
+      );
+
+      final response = await repository.calculateRates(
+        const RateRequest(originZipCode: '10001', destinationZipCode: '90210', weight: 1.0),
+      );
+
+      expect(response.rates.first.price, equals(6.20));
+      expect(response.rates.first.mailClass, equals('USPS_GROUND_ADVANTAGE'));
+    });
+
+    test('throws UspsUnknownException on unexpected response data type', () async {
+      when(
+        () => mockHttpClient.post<dynamic>(
+          '/prices/v3/base-rates/search',
+          data: any<dynamic>(named: 'data'),
+        ),
+      ).thenAnswer(
+        (_) async => Response(
+          data: 'malformed string',
+          statusCode: 200,
+          requestOptions: RequestOptions(
+            path: '/prices/v3/base-rates/search',
           ),
-          throwsA(isA<UspsUnknownException>()),
-        );
-      },
-    );
+        ),
+      );
+
+      expect(
+        () => repository.calculateRates(
+          const RateRequest(
+            originZipCode: '20260',
+            destinationZipCode: '78701',
+            weight: 1.0,
+          ),
+        ),
+        throwsA(isA<UspsUnknownException>()),
+      );
+    });
+
+    test('parses empty or generic map response via fallback fromJson', () async {
+      when(
+        () => mockHttpClient.post<dynamic>(
+          '/prices/v3/base-rates/search',
+          data: any<dynamic>(named: 'data'),
+        ),
+      ).thenAnswer(
+        (_) async => Response(
+          data: {'customInfo': 'noRatesListed'},
+          statusCode: 200,
+          requestOptions: RequestOptions(path: '/prices/v3/base-rates/search'),
+        ),
+      );
+
+      final response = await repository.calculateRates(
+        const RateRequest(originZipCode: '10001', destinationZipCode: '90210', weight: 1.0),
+      );
+
+      expect(response.rates, isEmpty);
+      expect(response.totalBasePrice, isNull);
+    });
   });
 }

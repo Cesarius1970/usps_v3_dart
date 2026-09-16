@@ -11,8 +11,8 @@ class LocationsRepository {
 
   /// Searches for USPS facilities near a [zipCode] or geographic coordinates ([latitude], [longitude]).
   ///
-  /// [maxResults] limits the maximum number of facilities returned (default 10).
-  /// [radius] specifies the search radius in miles.
+  /// The [maxResults] parameter limits the maximum number of facilities returned
+  /// (defaults to 10). The [radius] parameter specifies the search radius in miles.
   Future<LocationsResponse> findLocations({
     String? zipCode,
     double? latitude,

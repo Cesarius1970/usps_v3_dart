@@ -124,5 +124,19 @@ void main() {
 
       expect(result, isTrue);
     });
+
+    test('returns false when cancel status code is not 2xx', () async {
+      when(
+        () => mockHttpClient.delete<dynamic>(any()),
+      ).thenAnswer(
+        (_) async => Response(
+          statusCode: 400,
+          requestOptions: RequestOptions(path: '/labels/v3/label/123'),
+        ),
+      );
+
+      final result = await repository.cancelLabel('123');
+      expect(result, isFalse);
+    });
   });
 }

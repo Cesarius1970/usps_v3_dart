@@ -21,8 +21,8 @@ LabelRequest _$LabelRequestFromJson(Map<String, dynamic> json) => LabelRequest(
 
 Map<String, dynamic> _$LabelRequestToJson(LabelRequest instance) =>
     <String, dynamic>{
-      'fromAddress': instance.fromAddress,
-      'toAddress': instance.toAddress,
+      'fromAddress': instance.fromAddress.toJson(),
+      'toAddress': instance.toAddress.toJson(),
       'weight': instance.weight,
       'length': ?instance.length,
       'width': ?instance.width,

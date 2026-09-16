@@ -11,7 +11,8 @@ class TrackingRepository {
 
   /// Retrieves tracking details for a single package by its [trackingNumber].
   ///
-  /// [expand] can be `'DETAIL'` (returns all scan events) or `'SUMMARY'` (returns current status only).
+  /// The [expand] parameter can be `'DETAIL'` to return all scan events, or
+  /// `'SUMMARY'` to return current status only.
   Future<TrackingResponse> getTracking(
     String trackingNumber, {
     String expand = 'DETAIL',
@@ -33,8 +34,9 @@ class TrackingRepository {
 
   /// Retrieves tracking details for multiple packages in a single batch request.
   ///
-  /// [trackingNumbers] is a list of USPS tracking numbers (maximum 30 per USPS limits).
-  /// [expand] can be `'DETAIL'` or `'SUMMARY'` (default).
+  /// The [trackingNumbers] list specifies the USPS tracking numbers to query
+  /// (maximum 30 per USPS batch limit). The [expand] parameter can be
+  /// `'DETAIL'` or `'SUMMARY'`.
   Future<List<TrackingResponse>> getMultipleTracking(
     List<String> trackingNumbers, {
     String expand = 'SUMMARY',

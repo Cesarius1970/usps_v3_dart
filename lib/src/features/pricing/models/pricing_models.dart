@@ -115,7 +115,7 @@ class RateItem {
 }
 
 /// Represents the response returned by the USPS Prices / Rates API.
-@JsonSerializable()
+@JsonSerializable(explicitToJson: true)
 class RateResponse {
   /// Total calculated base postage price.
   final double? totalBasePrice;

@@ -92,3 +92,9 @@ final class UspsUnknownException extends UspsException {
       ? 'UspsUnknownException: $message (Cause: $cause)'
       : 'UspsUnknownException: $message';
 }
+
+/// Generic fallback exception when no specialized exception matches.
+final class UspsGenericException extends UspsException {
+  /// Creates a new [UspsGenericException] with the provided [message].
+  const UspsGenericException({required super.message});
+}

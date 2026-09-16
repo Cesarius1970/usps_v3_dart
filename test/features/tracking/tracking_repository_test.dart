@@ -173,5 +173,66 @@ void main() {
       expect(results[1].trackingNumber, equals('9400111899562537629999'));
       expect(results[1].destinationCity, equals('DALLAS'));
     });
+
+    test('successfully parses raw List in batch tracking', () async {
+      when(
+        () => mockHttpClient.get<dynamic>(
+          '/tracking/v3/tracking',
+          queryParameters: any(named: 'queryParameters'),
+        ),
+      ).thenAnswer(
+        (_) async => Response(
+          data: [
+            {'trackingNumber': '111', 'status': 'Delivered'},
+            {'trackingNumber': '222', 'status': 'In Transit'},
+          ],
+          statusCode: 200,
+          requestOptions: RequestOptions(path: '/tracking/v3/tracking'),
+        ),
+      );
+
+      final results = await repository.getMultipleTracking(['111', '222']);
+      expect(results.length, equals(2));
+      expect(results.first.trackingNumber, equals('111'));
+    });
+
+    test('successfully parses single Map object in batch tracking', () async {
+      when(
+        () => mockHttpClient.get<dynamic>(
+          '/tracking/v3/tracking',
+          queryParameters: any(named: 'queryParameters'),
+        ),
+      ).thenAnswer(
+        (_) async => Response(
+          data: {'trackingNumber': '999', 'status': 'Accepted'},
+          statusCode: 200,
+          requestOptions: RequestOptions(path: '/tracking/v3/tracking'),
+        ),
+      );
+
+      final results = await repository.getMultipleTracking(['999']);
+      expect(results.length, equals(1));
+      expect(results.first.trackingNumber, equals('999'));
+    });
+
+    test('throws UspsUnknownException on unexpected batch tracking response', () async {
+      when(
+        () => mockHttpClient.get<dynamic>(
+          '/tracking/v3/tracking',
+          queryParameters: any(named: 'queryParameters'),
+        ),
+      ).thenAnswer(
+        (_) async => Response(
+          data: 'invalid string',
+          statusCode: 200,
+          requestOptions: RequestOptions(path: '/tracking/v3/tracking'),
+        ),
+      );
+
+      expect(
+        () => repository.getMultipleTracking(['999']),
+        throwsA(isA<UspsUnknownException>()),
+      );
+    });
   });
 }

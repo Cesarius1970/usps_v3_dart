@@ -36,11 +36,11 @@ class UspsClient {
 
   /// Creates a new [UspsClient] with the given USPS Developer Portal credentials.
   ///
-  /// - [clientId]: Application Client ID from developer.usps.com.
-  /// - [clientSecret]: Application Client Secret from developer.usps.com.
-  /// - [environment]: Defaults to [UspsEnvironment.production]. Use [UspsEnvironment.sandbox] for testing.
-  /// - [baseUrl]: Optional override for the main API base URL.
-  /// - [tokenEndpoint]: Optional override for the OAuth token endpoint.
+  /// The [clientId] and [clientSecret] are obtained from developer.usps.com.
+  /// The [environment] defaults to [UspsEnvironment.production]. Use
+  /// [UspsEnvironment.sandbox] for integration testing.
+  /// Optionally override [baseUrl] or [tokenEndpoint], or configure custom
+  /// [connectTimeout], [receiveTimeout], and [sendTimeout] durations.
   factory UspsClient({
     required String clientId,
     required String clientSecret,
