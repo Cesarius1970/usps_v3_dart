@@ -152,4 +152,6 @@ Este documento registra de forma cronológica, numerada y secuencial todas las s
     - Se depuró el índice de Git para eliminar enlaces no portables.
   - **Ejecución y Despliegue:**
     - Se ejecutó `dart pub publish --dry-run` asegurando 0 advertencias una vez confirmado el estado en Git.
-    - Se procedió a ejecutar el comando de publicación `dart pub publish` e interactuar con el flujo de autenticación oficial de pub.dev.
+    - Se ejecutó `dart pub publish --force` contra los servidores de pub.dev. El backend de pub.dev notificó: *"Manual publishing has been disabled. This usually means this package should be published via automated publishing (see https://dart.dev/tools/pub/automated-publishing). To re-enable manual publishing, go to the package admin page (see https://pub.dev/packages/usps_v3_dart/admin)"*.
+    - Se implementó el flujo oficial de CI/CD para publicación automatizada con OIDC en [`.github/workflows/publish.yml`](file:///home/cesar/Proyectos/Dart/usps_v3_dart/.github/workflows/publish.yml).
+    - Se creó el tag Git `v1.0.1` y se subió a GitHub para disparar el flujo automatizado o permitir la publicación manual una vez activada en el panel de administración.
