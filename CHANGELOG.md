@@ -1,5 +1,13 @@
 # Changelog
 
+## 1.0.1
+
+- Updated dependencies to latest stable versions (`dio: ^5.11.1`, `coverage: ^1.15.0`, `build_runner: ^2.16.1`, `test: ^1.32.0`).
+- Added `explicitToJson: true` to nested models to guarantee recursive JSON map serialization.
+- Enhanced doc comments following Effective Dart documentation guidelines.
+- Added comprehensive model serialization test suite and expanded unit tests achieving 100% line coverage.
+- Optimized package publication structure with `.pubignore`.
+
 ## 1.0.0
 
 - Initial release of `usps_v3_dart`.

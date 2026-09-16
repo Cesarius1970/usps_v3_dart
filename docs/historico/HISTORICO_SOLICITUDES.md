@@ -137,3 +137,19 @@ Este documento registra de forma cronológica, numerada y secuencial todas las s
   - **Mantenimiento y Control de Versiones:**
     - Actualización de [`docs/MANUAL_TECNICO.md`](file:///home/cesar/Proyectos/Dart/usps_v3_dart/docs/MANUAL_TECNICO.md) con la sección de estrategia de testing y cobertura.
     - Generación de commit siguiendo Conventional Commits (`chore(deps): update dependencies, refine doc comments, and achieve 100% test coverage`) y sincronización en GitHub.
+
+---
+
+### Interacción 10: Preparación y Publicación en pub.dev
+- **Fecha:** 2026-09-15T20:04:00-05:00
+- **Solicitud del Usuario:**
+  > "Publica esta libreria en pub.dev"
+- **Respuesta y Acciones:**
+  - **Validación del Paquete (`dart pub publish --dry-run`):**
+    - Se identificaron advertencias sobre convenciones de pub: omisión de versión 1.0.1 en `CHANGELOG.md` y advertencia de enlace simbólico no ASCII en Git.
+    - Se actualizó [`CHANGELOG.md`](file:///home/cesar/Proyectos/Dart/usps_v3_dart/CHANGELOG.md) documentando formalmente los cambios de la versión 1.0.1.
+    - Se creó [`.pubignore`](file:///home/cesar/Proyectos/Dart/usps_v3_dart/.pubignore) para excluir carpetas de desarrollo interno (`coverage/`, `docs/`) del tarball distribuido en pub.dev, optimizando el tamaño del paquete a tan sólo 30 KB.
+    - Se depuró el índice de Git para eliminar enlaces no portables.
+  - **Ejecución y Despliegue:**
+    - Se ejecutó `dart pub publish --dry-run` asegurando 0 advertencias una vez confirmado el estado en Git.
+    - Se procedió a ejecutar el comando de publicación `dart pub publish` e interactuar con el flujo de autenticación oficial de pub.dev.

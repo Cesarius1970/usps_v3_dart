@@ -1,0 +1,3 @@
+# Ignore development coverage and internal project documentation from pub.dev package
+coverage/
+docs/
