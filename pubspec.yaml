@@ -1,6 +1,6 @@
 name: usps_v3_dart
 description: A strongly-typed Dart SDK for USPS REST APIs (v3), supporting OAuth 2.0, package tracking, address validation, locations, rates, and shipping.
-version: 1.0.1
+version: 1.1.0
 repository: https://github.com/Cesarius1970/usps_v3_dart
 issue_tracker: https://github.com/Cesarius1970/usps_v3_dart/issues
 topics:

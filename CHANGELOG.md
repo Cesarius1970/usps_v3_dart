@@ -1,5 +1,14 @@
 # Changelog
 
+## 1.1.0
+
+- Added strongly-typed enums for USPS APIs: `UspsMailClass`, `LabelImageType`, `PriceType`, and `TrackingExpand`.
+- Added deterministic connection and resource disposal with `close({bool force = false})` on `UspsClient`, `UspsHttpClient`, and `UspsAuthManager`.
+- Added `UspsRetryInterceptor` with exponential backoff for transient HTTP errors (429, 500, 502, 503, 504) and network timeouts.
+- Added `UspsLogInterceptor` with automated redaction of sensitive Bearer tokens and client secrets for secure debugging.
+- Added `UspsValidators` client-side guard utilities for US 5-digit ZIP codes, ZIP+4 extensions, and tracking numbers.
+- Expanded test suite to 102 tests maintaining 100.00% line coverage across all library files.
+
 ## 1.0.1
 
 - Updated dependencies to latest stable versions (`dio: ^5.11.1`, `coverage: ^1.15.0`, `build_runner: ^2.16.1`, `test: ^1.32.0`).

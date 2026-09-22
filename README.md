@@ -2,6 +2,7 @@
 
 [![Pub Version](https://img.shields.io/pub/v/usps_v3_dart.svg)](https://pub.dev/packages/usps_v3_dart)
 [![License: MIT](https://img.shields.io/badge/License-MIT-blue.svg)](LICENSE)
+[![Coverage: 100%](https://img.shields.io/badge/Coverage-100%25-brightgreen.svg)](https://github.com/Cesarius1970/usps_v3_dart)
 
 A strongly-typed, production-ready Dart SDK for the official **USPS REST APIs (v3)** (`developer.usps.com`).
 
@@ -9,13 +10,18 @@ A strongly-typed, production-ready Dart SDK for the official **USPS REST APIs (v
 
 ## Features
 
-- **Automated OAuth 2.0 Management**: Handles token acquisition, in-memory caching, proactive renewal, and seamless 401 retry via HTTP interceptors.
+- **Automated OAuth 2.0 Management**: Handles token acquisition, in-memory caching, proactive renewal, and seamless 401 retry via queued HTTP interceptors (`UspsAuthManager`, `UspsAuthInterceptor`).
+- **Strongly-Typed Enums**: First-class enums for mail classes (`UspsMailClass`), label image formats (`LabelImageType`), pricing tiers (`PriceType`), and tracking modes (`TrackingExpand`).
+- **Resilient Network Client**: Built-in exponential backoff retry for transient network errors and rate limits (`UspsRetryInterceptor`).
+- **Secure Logging**: Auditable logging interceptor with automatic redaction of Bearer tokens and API secrets (`UspsLogInterceptor`).
+- **Deterministic Resource Cleanup**: Clean disposal of underlying HTTP connection pools with `usps.close()`.
+- **Client-Side Format Guards**: Input validation utilities for US 5-digit ZIP codes, ZIP+4 extensions, and tracking numbers (`UspsValidators`).
 - **Package Tracking**: Query status and chronological scan events for single or batch tracking numbers (`TrackingRepository`).
 - **Address Standardization**: Validate US addresses, fix formats, and append official `ZIP+4` codes (`AddressesRepository`).
 - **Post Office & Facility Locator**: Search USPS facilities by ZIP code or geographic coordinates (`LocationsRepository`).
 - **Postage Rate Calculator**: Calculate domestic base rates and surcharges by weight, dimensions, and mail class (`PricingRepository`).
 - **Shipping Labels**: Generate domestic postage labels with barcodes in PDF, PNG, or ZPL formats (`ShippingRepository`).
-- **Unified Error Handling**: Strongly-typed exception hierarchy (`UspsApiException`, `UspsAuthException`, `UspsNetworkException`).
+- **Unified Error Handling**: Strongly-typed exception hierarchy (`UspsApiException`, `UspsAuthException`, `UspsNetworkException`, `UspsUnknownException`).
 
 ---
 
@@ -25,7 +31,7 @@ Add `usps_v3_dart` to your `pubspec.yaml`:
 
 ```yaml
 dependencies:
-  usps_v3_dart: ^1.0.0
+  usps_v3_dart: ^1.1.0
 ```
 
 Then run:
@@ -42,18 +48,20 @@ dart pub get
 import 'package:usps_v3_dart/usps_v3_dart.dart';
 
 void main() async {
-  // 1. Initialize client facade
+  // 1. Initialize client facade with optional retry and safe logging
   final usps = UspsClient(
     clientId: 'YOUR_USPS_CLIENT_ID',
     clientSecret: 'YOUR_USPS_CLIENT_SECRET',
     environment: UspsEnvironment.sandbox, // or UspsEnvironment.production
+    enableRetry: true, // Auto-retry transient 429 / 5xx / timeouts
+    enableLogging: false, // Set to true to debug requests with redacted tokens
   );
 
-  // 2. Track a package
   try {
+    // 2. Track a package
     final tracking = await usps.tracking.getTracking(
       '9400111899562537624656',
-      expand: 'DETAIL',
+      expand: TrackingExpand.detail,
     );
 
     print('Status: ${tracking.status}');
@@ -65,6 +73,9 @@ void main() async {
     print('USPS API Error (${e.statusCode}): ${e.message}');
   } on UspsException catch (e) {
     print('SDK Error: ${e.message}');
+  } finally {
+    // 3. Always dispose client to release HTTP connection pools
+    usps.close();
   }
 }
 ```
@@ -105,7 +116,7 @@ for (final location in locations.locations) {
 }
 ```
 
-### 3. Rate Calculation
+### 3. Rate Calculation with Strongly-Typed Enums
 
 ```dart
 final quote = await usps.pricing.calculateRates(
@@ -116,7 +127,8 @@ final quote = await usps.pricing.calculateRates(
     length: 10.0,
     width: 6.0,
     height: 4.0,
-    mailClass: 'PRIORITY_MAIL',
+    mailClass: UspsMailClass.priorityMail,
+    priceType: PriceType.retail,
   ),
 );
 
@@ -144,13 +156,23 @@ final label = await usps.shipping.createLabel(
       zipCode: '78701',
     ),
     weight: 1.5,
-    mailClass: 'PRIORITY_MAIL',
-    imageType: 'PDF',
+    mailClass: UspsMailClass.priorityMail,
+    imageType: LabelImageType.pdf,
   ),
 );
 
 print('Tracking Number: ${label.trackingNumber}');
 print('Postage Cost: \$${label.totalPrice}');
+```
+
+### 5. Client-Side Input Validation
+
+```dart
+if (UspsValidators.isValidZipCode('90210')) {
+  print('Valid ZIP code!');
+}
+
+final cleanTracking = UspsValidators.requireValidTrackingNumber('9400111899562537624656');
 ```
 
 ---

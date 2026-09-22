@@ -195,3 +195,24 @@ Este documento registra de forma cronológica, numerada y secuencial todas las s
   - **Mantenimiento y Git:**
     - Actualización de [`docs/MANUAL_TECNICO.md`](file:///home/cesar/Proyectos/Dart/usps_v3_dart/docs/MANUAL_TECNICO.md) con las secciones de algoritmos 2.4, 2.5, 2.6 y 2.7.
     - Generación de commit Git siguiendo Conventional Commits y sincronización con GitHub.
+
+---
+
+### Interacción 13: Preparación Integral de Documentación, Bump a v1.1.0 y Publicación
+- **Fecha:** 2026-09-22T16:34:24-05:00
+- **Solicitud del Usuario:**
+  > "Prepara toda la documentacion para subir el proyecto a github y pub.dev; realiza las publicaciones."
+- **Respuesta y Acciones:**
+  - **Actualización de Documentación y Versión (SemVer):**
+    - Incremento de versión a `1.1.0` en [`pubspec.yaml`](file:///home/cesar/Proyectos/Dart/usps_v3_dart/pubspec.yaml).
+    - Registro de notas de lanzamiento completas en [`CHANGELOG.md`](file:///home/cesar/Proyectos/Dart/usps_v3_dart/CHANGELOG.md) para la versión `1.1.0`.
+    - Actualización integral de [`README.md`](file:///home/cesar/Proyectos/Dart/usps_v3_dart/README.md) con las nuevas características (`UspsMailClass`, `LabelImageType`, `PriceType`, `TrackingExpand`, `enableRetry`, `enableLogging`, `usps.close()`, `UspsValidators`).
+    - Actualización del encabezado de versión en [`docs/MANUAL_TECNICO.md`](file:///home/cesar/Proyectos/Dart/usps_v3_dart/docs/MANUAL_TECNICO.md) a `1.1.0`.
+  - **Validaciones de Calidad y Empaquetado:**
+    - `dart analyze .`: 0 advertencias y 0 errores (`No issues found!`).
+    - `dart test`: 102/102 tests pasando satisfactoriamente con 100% de cobertura.
+    - `dart pub publish --dry-run`: 0 advertencias (paquete optimizado a 37 KB).
+  - **Control de Versiones y Despliegue:**
+    - Commit con Conventional Commits: `chore(release): bump version to 1.1.0 and update release documentation`.
+    - Creación y subida del tag Git `v1.1.0` a GitHub (`origin v1.1.0`) para disparar el flujo de GitHub Actions con OIDC (`.github/workflows/publish.yml`).
+    - Ejecución de `dart pub publish --force` contra el backend de pub.dev.

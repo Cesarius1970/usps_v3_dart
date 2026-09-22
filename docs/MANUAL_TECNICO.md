@@ -1,9 +1,9 @@
 # Manual Técnico de Arquitectura y Algoritmos: `usps_v3_dart`
 
-> **Versión del SDK:** 1.0.1  
+> **Versión del SDK:** 1.1.0  
 > **Plataforma Objetivo:** Dart 3.12+ / Flutter  
 > **API de USPS Soportada:** USPS REST APIs (v3) (`developer.usps.com`)  
-> **Última Actualización:** 2026-09-15
+> **Última Actualización:** 2026-09-22
 
 ---
 
