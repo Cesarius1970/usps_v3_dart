@@ -251,3 +251,26 @@ Este documento registra de forma cronológica, numerada y secuencial todas las s
   - **Documentación Técnica:**
     - Actualizado [`docs/MANUAL_TECNICO.md`](file:///home/cesar/Proyectos/Dart/usps_v3_dart/docs/MANUAL_TECNICO.md) con las secciones de algoritmos 2.8, 2.9, 2.10 y 2.11 y la matriz de endpoints completa.
 
+---
+
+### Interacción 15: Preparación de Documentación y Publicación de Versión 1.2.0 en GitHub y pub.dev
+- **Fecha:** 2026-09-22T17:03:20-05:00
+- **Solicitud del Usuario:**
+  > "Prepara toda la documentacion para subir el proyecto a github y pub.dev; realiza las publicaciones."
+- **Respuesta y Acciones:**
+  - **Revisión y Consolidación de Documentación:**
+    - [`pubspec.yaml`](file:///home/cesar/Proyectos/Dart/usps_v3_dart/pubspec.yaml): `version: 1.2.0` con la dependencia directa `crypto: ^3.0.7` y comentarios de arquitectura.
+    - [`CHANGELOG.md`](file:///home/cesar/Proyectos/Dart/usps_v3_dart/CHANGELOG.md): Registro exhaustivo de la versión `## 1.2.0` cubriendo Carrier Pickup, Service Standards, SCAN Forms, Proof of Delivery (POD), y Webhook Verifier.
+    - [`README.md`](file:///home/cesar/Proyectos/Dart/usps_v3_dart/README.md): Actualizado con las nuevas APIs, instrucciones de instalación de `^1.2.0` y ejemplos de código.
+    - [`docs/MANUAL_TECNICO.md`](file:///home/cesar/Proyectos/Dart/usps_v3_dart/docs/MANUAL_TECNICO.md): Encabezado de versión actualizado a `1.2.0`, diagramas y matriz de endpoints sincronizados.
+  - **Validaciones de Calidad y Empaquetado:**
+    - `dart analyze .`: 0 advertencias y 0 errores (`No issues found!`).
+    - `dart test`: 140/140 pruebas unitarias pasando satisfactoriamente.
+    - Cobertura de pruebas: 100.00% (1,158/1,158 líneas de código ejecutables cubiertas en los 35 archivos de `lib/`).
+    - `dart pub publish --dry-run`: 0 advertencias (paquete optimizado a 51 KB).
+  - **Publicación y Control de Versiones:**
+    - Generación del commit `chore(release): prepare documentation and release v1.2.0`.
+    - Creación y subida del tag Git `v1.2.0` a GitHub (`origin main` y `origin v1.2.0`).
+    - Despliegue automático disparado a través del workflow oficial de GitHub Actions con autenticación OIDC (`.github/workflows/publish.yml`) y ejecución de `dart pub publish --force`.
+
+
