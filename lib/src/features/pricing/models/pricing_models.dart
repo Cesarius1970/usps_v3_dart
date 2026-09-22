@@ -1,5 +1,7 @@
 import 'package:json_annotation/json_annotation.dart';
 
+import '../../../core/enums/usps_enums.dart';
+
 part 'pricing_models.g.dart';
 
 /// Represents a rate calculation request for domestic USPS mail and package services.
@@ -25,11 +27,11 @@ class RateRequest {
   /// Package height in inches.
   final double? height;
 
-  /// Specific mail class to quote (e.g. "PRIORITY_MAIL", "USPS_GROUND_ADVANTAGE").
-  final String? mailClass;
+  /// Specific mail class to quote (e.g. [UspsMailClass.priorityMail]).
+  final UspsMailClass? mailClass;
 
-  /// Price type rate tier (e.g. "RETAIL", "COMMERCIAL").
-  final String? priceType;
+  /// Price type rate tier (e.g. [PriceType.retail], [PriceType.commercial]).
+  final PriceType? priceType;
 
   /// Planned mailing date in ISO-8601 or YYYY-MM-DD format.
   final String? mailingDate;
@@ -84,6 +86,9 @@ class RateFee {
 class RateItem {
   /// USPS mail class identifier (e.g. "PRIORITY_MAIL", "PRIORITY_MAIL_EXPRESS").
   final String? mailClass;
+
+  /// Strongly-typed [UspsMailClass], or null if unrecognized or not provided.
+  UspsMailClass? get parsedMailClass => UspsMailClass.tryParse(mailClass);
 
   /// Postage price for this class.
   final double? price;

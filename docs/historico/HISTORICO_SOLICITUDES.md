@@ -155,3 +155,43 @@ Este documento registra de forma cronológica, numerada y secuencial todas las s
     - Se ejecutó `dart pub publish --force` contra los servidores de pub.dev. El backend de pub.dev notificó: *"Manual publishing has been disabled. This usually means this package should be published via automated publishing (see https://dart.dev/tools/pub/automated-publishing). To re-enable manual publishing, go to the package admin page (see https://pub.dev/packages/usps_v3_dart/admin)"*.
     - Se implementó el flujo oficial de CI/CD para publicación automatizada con OIDC en [`.github/workflows/publish.yml`](file:///home/cesar/Proyectos/Dart/usps_v3_dart/.github/workflows/publish.yml).
     - Se creó el tag Git `v1.0.1` y se subió a GitHub para disparar el flujo automatizado o permitir la publicación manual una vez activada en el panel de administración.
+
+---
+
+### Interacción 11: Análisis Integral del Proyecto y Recomendación de Refactorizaciones y Nuevas Funcionalidades
+- **Fecha:** 2026-09-22T16:20:06-05:00
+- **Solicitud del Usuario:**
+  > "Analiza este proyecto y dame los detalles completos. Recomienda refactorizaciones necesarias y alguna nueva funcionalidad"
+- **Respuesta y Acciones:**
+  - Diagnóstico completo del estado del SDK: arquitectura en 5 pilares (`Addresses`, `Locations`, `Pricing`, `Shipping`, `Tracking`), cobertura del 100%, 76 tests.
+  - Presentación de 5 refactorizaciones críticas: tipado fuerte con enums, ciclo de vida con `close()`, interceptor de reintentos con backoff exponencial, interceptor de logging seguro con ofuscación de credenciales y validaciones de entrada en el cliente (`UspsValidators`).
+  - Presentación de nuevas funcionalidades de alto impacto: Carrier Pickup API (recolección a domicilio), Service Standards API (tiempos de tránsito), SCAN Forms (PS Form 5630), Proof of Delivery (POD) y Verificación de Webhooks.
+
+---
+
+### Interacción 12: Implementación de Refactorizaciones Recomendadas y Mantenimiento de Cobertura al 100%
+- **Fecha:** 2026-09-22T16:22:05-05:00
+- **Solicitud del Usuario:**
+  > "Procede com implementar las refactorizaciones recomendadas"
+- **Respuesta y Acciones:**
+  - **Tipado Fuerte con Enumeraciones:**
+    - Creación de [`lib/src/core/enums/usps_enums.dart`](file:///home/cesar/Proyectos/Dart/usps_v3_dart/lib/src/core/enums/usps_enums.dart) con `UspsMailClass`, `LabelImageType`, `PriceType`, `TrackingExpand`.
+    - Actualización de `RateRequest`, `RateItem`, `LabelRequest`, `TrackingRepository.getTracking`, y `getMultipleTracking`.
+    - Regeneración de código con `build_runner` para serialización JSON automática.
+  - **Ciclo de Vida y Gestión de Recursos:**
+    - Incorporación de `close({bool force = false})` en `UspsClient`, `UspsHttpClient` y `UspsAuthManager` para liberar pools de conexiones HTTP de forma determinista.
+  - **Resiliencia de Red con Reintentos Automáticos:**
+    - Creación de [`lib/src/core/network/usps_retry_interceptor.dart`](file:///home/cesar/Proyectos/Dart/usps_v3_dart/lib/src/core/network/usps_retry_interceptor.dart) con soporte para reintentos exponenciales en errores transitorios (429, 500, 502, 503, 504, timeouts).
+    - Opción `enableRetry` configurable en el constructor de `UspsClient`.
+  - **Auditoría y Logging Seguro:**
+    - Creación de [`lib/src/core/network/usps_log_interceptor.dart`](file:///home/cesar/Proyectos/Dart/usps_v3_dart/lib/src/core/network/usps_log_interceptor.dart) con ofuscación automática de tokens `Bearer [REDACTED]` y claves de API `client_secret`.
+    - Opción `enableLogging` configurable en `UspsClient`.
+  - **Validaciones en el Cliente:**
+    - Creación de [`lib/src/core/utils/usps_validators.dart`](file:///home/cesar/Proyectos/Dart/usps_v3_dart/lib/src/core/utils/usps_validators.dart) para códigos postales de 5 dígitos, ZIP+4 y números de guía de USPS.
+  - **Pruebas y Cobertura:**
+    - Se agregaron 26 tests unitarios adicionales, alcanzando un total de **102 tests unitarios (0 fallos)**.
+    - Se mantuvo una cobertura de código estricta del **100.00% (858/858 líneas)** en los 26 archivos de `lib/`.
+    - `dart analyze .` verificado con **0 advertencias / 0 errores**.
+  - **Mantenimiento y Git:**
+    - Actualización de [`docs/MANUAL_TECNICO.md`](file:///home/cesar/Proyectos/Dart/usps_v3_dart/docs/MANUAL_TECNICO.md) con las secciones de algoritmos 2.4, 2.5, 2.6 y 2.7.
+    - Generación de commit Git siguiendo Conventional Commits y sincronización con GitHub.

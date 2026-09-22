@@ -4,11 +4,7 @@ import 'dart:io';
 import 'package:dio/dio.dart';
 import 'package:mocktail/mocktail.dart';
 import 'package:test/test.dart';
-import 'package:usps_v3_dart/src/core/exceptions/usps_exceptions.dart';
-import 'package:usps_v3_dart/src/core/network/usps_http_client.dart';
-import 'package:usps_v3_dart/src/features/addresses/models/address_models.dart';
-import 'package:usps_v3_dart/src/features/shipping/models/shipping_models.dart';
-import 'package:usps_v3_dart/src/features/shipping/repository/shipping_repository.dart';
+import 'package:usps_v3_dart/usps_v3_dart.dart';
 
 class MockUspsHttpClient extends Mock implements UspsHttpClient {}
 
@@ -59,8 +55,8 @@ void main() {
           zipCode: '78701',
         ),
         weight: 1.25,
-        mailClass: 'PRIORITY_MAIL',
-        imageType: 'PDF',
+        mailClass: UspsMailClass.priorityMail,
+        imageType: LabelImageType.pdf,
       );
 
       final LabelResponse response = await repository.createLabel(request);

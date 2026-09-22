@@ -1,5 +1,7 @@
+import '../../../core/enums/usps_enums.dart';
 import '../../../core/exceptions/usps_exceptions.dart';
 import '../../../core/network/usps_http_client.dart';
+import '../../../core/utils/usps_validators.dart';
 import '../models/tracking_models.dart';
 
 /// Repository for querying USPS Tracking REST APIs (v3).
@@ -11,15 +13,18 @@ class TrackingRepository {
 
   /// Retrieves tracking details for a single package by its [trackingNumber].
   ///
-  /// The [expand] parameter can be `'DETAIL'` to return all scan events, or
-  /// `'SUMMARY'` to return current status only.
+  /// The [expand] parameter can be [TrackingExpand.detail] to return all scan events, or
+  /// [TrackingExpand.summary] to return current status only.
   Future<TrackingResponse> getTracking(
     String trackingNumber, {
-    String expand = 'DETAIL',
+    TrackingExpand expand = TrackingExpand.detail,
   }) async {
+    final validTracking = UspsValidators.requireValidTrackingNumber(
+      trackingNumber,
+    );
     final response = await _client.get<dynamic>(
-      '/tracking/v3/tracking/$trackingNumber',
-      queryParameters: {'expand': expand},
+      '/tracking/v3/tracking/$validTracking',
+      queryParameters: {'expand': expand.value},
     );
 
     final data = response.data;
@@ -36,20 +41,24 @@ class TrackingRepository {
   ///
   /// The [trackingNumbers] list specifies the USPS tracking numbers to query
   /// (maximum 30 per USPS batch limit). The [expand] parameter can be
-  /// `'DETAIL'` or `'SUMMARY'`.
+  /// [TrackingExpand.detail] or [TrackingExpand.summary].
   Future<List<TrackingResponse>> getMultipleTracking(
     List<String> trackingNumbers, {
-    String expand = 'SUMMARY',
+    TrackingExpand expand = TrackingExpand.summary,
   }) async {
     if (trackingNumbers.isEmpty) {
       return const [];
+    }
+
+    for (final number in trackingNumbers) {
+      UspsValidators.requireValidTrackingNumber(number);
     }
 
     final response = await _client.get<dynamic>(
       '/tracking/v3/tracking',
       queryParameters: {
         'trackingNumbers': trackingNumbers.join(','),
-        'expand': expand,
+        'expand': expand.value,
       },
     );
 

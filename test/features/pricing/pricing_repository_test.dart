@@ -4,10 +4,7 @@ import 'dart:io';
 import 'package:dio/dio.dart';
 import 'package:mocktail/mocktail.dart';
 import 'package:test/test.dart';
-import 'package:usps_v3_dart/src/core/exceptions/usps_exceptions.dart';
-import 'package:usps_v3_dart/src/core/network/usps_http_client.dart';
-import 'package:usps_v3_dart/src/features/pricing/models/pricing_models.dart';
-import 'package:usps_v3_dart/src/features/pricing/repository/pricing_repository.dart';
+import 'package:usps_v3_dart/usps_v3_dart.dart';
 
 class MockUspsHttpClient extends Mock implements UspsHttpClient {}
 
@@ -51,7 +48,7 @@ void main() {
         length: 10.0,
         width: 6.0,
         height: 4.0,
-        mailClass: 'PRIORITY_MAIL',
+        mailClass: UspsMailClass.priorityMail,
       );
 
       final RateResponse response = await repository.calculateRates(request);

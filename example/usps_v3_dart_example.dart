@@ -16,7 +16,7 @@ void main() async {
     print('\n[1] Tracking a Package...');
     final tracking = await usps.tracking.getTracking(
       '9400111899562537624656',
-      expand: 'DETAIL',
+      expand: TrackingExpand.detail,
     );
     print('Tracking Number: ${tracking.trackingNumber}');
     print('Status: ${tracking.status}');
@@ -49,7 +49,7 @@ void main() async {
       length: 10.0,
       width: 6.0,
       height: 4.0,
-      mailClass: 'PRIORITY_MAIL',
+      mailClass: UspsMailClass.priorityMail,
     );
 
     final rates = await usps.pricing.calculateRates(rateRequest);
@@ -75,5 +75,8 @@ void main() async {
     print('Network Error: ${e.message}');
   } on UspsException catch (e) {
     print('General USPS SDK Error: ${e.message}');
+  } finally {
+    // 6. Dispose client and release network resources
+    usps.close();
   }
 }

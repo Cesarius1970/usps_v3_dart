@@ -38,6 +38,11 @@ class UspsHttpClient {
     dio.interceptors.add(interceptor);
   }
 
+  /// Closes the underlying [Dio] client and its HTTP connection pool.
+  void close({bool force = false}) {
+    dio.close(force: force);
+  }
+
   /// Sends an HTTP GET request to [path].
   Future<Response<T>> get<T>(
     String path, {

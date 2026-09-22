@@ -2,6 +2,8 @@ import 'core/auth/usps_auth_manager.dart';
 import 'core/environment/usps_environment.dart';
 import 'core/network/usps_auth_interceptor.dart';
 import 'core/network/usps_http_client.dart';
+import 'core/network/usps_log_interceptor.dart';
+import 'core/network/usps_retry_interceptor.dart';
 import 'features/addresses/repository/addresses_repository.dart';
 import 'features/locations/repository/locations_repository.dart';
 import 'features/pricing/repository/pricing_repository.dart';
@@ -41,6 +43,9 @@ class UspsClient {
   /// [UspsEnvironment.sandbox] for integration testing.
   /// Optionally override [baseUrl] or [tokenEndpoint], or configure custom
   /// [connectTimeout], [receiveTimeout], and [sendTimeout] durations.
+  ///
+  /// Set [enableLogging] to true to log redacted HTTP requests and responses.
+  /// Set [enableRetry] to true to enable exponential backoff retry on transient failures.
   factory UspsClient({
     required String clientId,
     required String clientSecret,
@@ -50,6 +55,10 @@ class UspsClient {
     Duration connectTimeout = const Duration(seconds: 30),
     Duration receiveTimeout = const Duration(seconds: 30),
     Duration sendTimeout = const Duration(seconds: 30),
+    bool enableLogging = false,
+    void Function(String message)? logPrint,
+    bool enableRetry = false,
+    int maxRetries = 3,
   }) {
     final effectiveBaseUrl = baseUrl ?? environment.baseUrl;
     final effectiveTokenEndpoint = tokenEndpoint ?? environment.tokenEndpoint;
@@ -68,10 +77,27 @@ class UspsClient {
       sendTimeout: sendTimeout,
     );
 
+    // Attach retry interceptor if enabled
+    if (enableRetry) {
+      httpClient.addInterceptor(
+        UspsRetryInterceptor(
+          dio: httpClient.dio,
+          maxRetries: maxRetries,
+        ),
+      );
+    }
+
     // Attach OAuth token interceptor to automatically sign requests and handle 401s
     httpClient.addInterceptor(
       UspsAuthInterceptor(authManager: authManager, dio: httpClient.dio),
     );
+
+    // Attach logging interceptor if enabled
+    if (enableLogging) {
+      httpClient.addInterceptor(
+        UspsLogInterceptor(logPrint: logPrint),
+      );
+    }
 
     return UspsClient._(
       httpClient: httpClient,
@@ -94,4 +120,10 @@ class UspsClient {
     required this.pricing,
     required this.shipping,
   });
+
+  /// Closes underlying HTTP clients and releases active network connections.
+  void close({bool force = false}) {
+    httpClient.close(force: force);
+    auth.close(force: force);
+  }
 }

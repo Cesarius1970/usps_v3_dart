@@ -13,9 +13,11 @@ LabelRequest _$LabelRequestFromJson(Map<String, dynamic> json) => LabelRequest(
   length: (json['length'] as num?)?.toDouble(),
   width: (json['width'] as num?)?.toDouble(),
   height: (json['height'] as num?)?.toDouble(),
-  mailClass: json['mailClass'] as String?,
+  mailClass: $enumDecodeNullable(_$UspsMailClassEnumMap, json['mailClass']),
   packageDescription: json['packageDescription'] as String?,
-  imageType: json['imageType'] as String? ?? 'PDF',
+  imageType:
+      $enumDecodeNullable(_$LabelImageTypeEnumMap, json['imageType']) ??
+      LabelImageType.pdf,
   labelBrokerId: json['labelBrokerId'] as String?,
 );
 
@@ -27,11 +29,28 @@ Map<String, dynamic> _$LabelRequestToJson(LabelRequest instance) =>
       'length': ?instance.length,
       'width': ?instance.width,
       'height': ?instance.height,
-      'mailClass': ?instance.mailClass,
+      'mailClass': ?_$UspsMailClassEnumMap[instance.mailClass],
       'packageDescription': ?instance.packageDescription,
-      'imageType': instance.imageType,
+      'imageType': _$LabelImageTypeEnumMap[instance.imageType]!,
       'labelBrokerId': ?instance.labelBrokerId,
     };
+
+const _$UspsMailClassEnumMap = {
+  UspsMailClass.priorityMail: 'PRIORITY_MAIL',
+  UspsMailClass.priorityMailExpress: 'PRIORITY_MAIL_EXPRESS',
+  UspsMailClass.groundAdvantage: 'USPS_GROUND_ADVANTAGE',
+  UspsMailClass.mediaMail: 'MEDIA_MAIL',
+  UspsMailClass.libraryMail: 'LIBRARY_MAIL',
+};
+
+const _$LabelImageTypeEnumMap = {
+  LabelImageType.pdf: 'PDF',
+  LabelImageType.png: 'PNG',
+  LabelImageType.zpl203: 'ZPL203',
+  LabelImageType.zpl300: 'ZPL300',
+  LabelImageType.svg: 'SVG',
+  LabelImageType.tiff: 'TIFF',
+};
 
 LabelResponse _$LabelResponseFromJson(Map<String, dynamic> json) =>
     LabelResponse(

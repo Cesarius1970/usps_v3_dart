@@ -118,8 +118,8 @@ void main() {
         length: 10.0,
         width: 8.0,
         height: 4.0,
-        mailClass: 'PRIORITY_MAIL',
-        priceType: 'RETAIL',
+        mailClass: UspsMailClass.priorityMail,
+        priceType: PriceType.retail,
         mailingDate: '2026-09-15',
         hasNonstandardFees: false,
       );
@@ -128,10 +128,13 @@ void main() {
       expect(reqJson['originZIPCode'], equals('90210'));
       expect(reqJson['weight'], equals(2.5));
       expect(reqJson['mailClass'], equals('PRIORITY_MAIL'));
+      expect(reqJson['priceType'], equals('RETAIL'));
 
       final reconstructedReq = RateRequest.fromJson(reqJson);
       expect(reconstructedReq.originZipCode, equals('90210'));
       expect(reconstructedReq.weight, equals(2.5));
+      expect(reconstructedReq.mailClass, equals(UspsMailClass.priorityMail));
+      expect(reconstructedReq.priceType, equals(PriceType.retail));
 
       const item = RateItem(
         mailClass: 'PRIORITY_MAIL',
@@ -146,6 +149,7 @@ void main() {
 
       final reconstructedItem = RateItem.fromJson(itemJson);
       expect(reconstructedItem.price, equals(9.85));
+      expect(reconstructedItem.parsedMailClass, equals(UspsMailClass.priorityMail));
 
       const fee = RateFee(feeName: 'Base Rate Fee', feePrice: 2.50);
       final feeJson = fee.toJson();
@@ -177,17 +181,20 @@ void main() {
         fromAddress: Address(streetAddress: '200 ORIG ST', city: 'LOS ANGELES', state: 'CA', zipCode: '90001'),
         packageDescription: 'Documents',
         weight: 0.5,
-        mailClass: 'PRIORITY_MAIL',
-        imageType: 'PDF',
+        mailClass: UspsMailClass.priorityMail,
+        imageType: LabelImageType.pdf,
       );
 
       final reqJson = request.toJson();
       expect(reqJson['packageDescription'], equals('Documents'));
       expect(reqJson['imageType'], equals('PDF'));
+      expect(reqJson['mailClass'], equals('PRIORITY_MAIL'));
 
       final reconstructedReq = LabelRequest.fromJson(reqJson);
       expect(reconstructedReq.packageDescription, equals('Documents'));
       expect(reconstructedReq.toAddress.city, equals('NEW YORK'));
+      expect(reconstructedReq.mailClass, equals(UspsMailClass.priorityMail));
+      expect(reconstructedReq.imageType, equals(LabelImageType.pdf));
 
       const response = LabelResponse(
         trackingNumber: '9400111899562537624123',

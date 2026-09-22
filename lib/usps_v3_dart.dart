@@ -11,8 +11,13 @@ library;
 
 export 'src/core/auth/models/oauth_token.dart';
 export 'src/core/auth/usps_auth_manager.dart';
+export 'src/core/enums/usps_enums.dart';
 export 'src/core/environment/usps_environment.dart';
 export 'src/core/exceptions/usps_exceptions.dart';
+export 'src/core/network/usps_http_client.dart';
+export 'src/core/network/usps_log_interceptor.dart';
+export 'src/core/network/usps_retry_interceptor.dart';
+export 'src/core/utils/usps_validators.dart';
 export 'src/features/addresses/models/address_models.dart';
 export 'src/features/addresses/repository/addresses_repository.dart';
 export 'src/features/locations/models/location_models.dart';

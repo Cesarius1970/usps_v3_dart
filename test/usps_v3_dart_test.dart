@@ -39,5 +39,25 @@ void main() {
         equals(const Duration(seconds: 15)),
       );
     });
+
+    test('instantiates with enableLogging and enableRetry interceptors', () {
+      final client = UspsClient(
+        clientId: 'mock_client_id',
+        clientSecret: 'mock_client_secret',
+        enableLogging: true,
+        enableRetry: true,
+        maxRetries: 4,
+      );
+
+      final hasRetryInterceptor = client.httpClient.dio.interceptors
+          .any((i) => i is UspsRetryInterceptor);
+      final hasLogInterceptor = client.httpClient.dio.interceptors
+          .any((i) => i is UspsLogInterceptor);
+
+      expect(hasRetryInterceptor, isTrue);
+      expect(hasLogInterceptor, isTrue);
+
+      expect(() => client.close(), returnsNormally);
+    });
   });
 }

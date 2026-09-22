@@ -1,5 +1,6 @@
 import '../../../core/exceptions/usps_exceptions.dart';
 import '../../../core/network/usps_http_client.dart';
+import '../../../core/utils/usps_validators.dart';
 import '../models/address_models.dart';
 
 /// Repository for interacting with USPS Addresses REST APIs (v3).
@@ -58,9 +59,10 @@ class AddressesRepository {
 
   /// Looks up the official city and state associated with a 5-digit [zipCode].
   Future<CityStateLookup> lookupCityState(String zipCode) async {
+    final validZip = UspsValidators.requireValidZipCode(zipCode);
     final response = await _client.get<dynamic>(
       '/addresses/v3/city-state',
-      queryParameters: {'ZIPCode': zipCode},
+      queryParameters: {'ZIPCode': validZip},
     );
 
     final data = response.data;

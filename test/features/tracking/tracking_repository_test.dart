@@ -4,10 +4,7 @@ import 'dart:io';
 import 'package:dio/dio.dart';
 import 'package:mocktail/mocktail.dart';
 import 'package:test/test.dart';
-import 'package:usps_v3_dart/src/core/exceptions/usps_exceptions.dart';
-import 'package:usps_v3_dart/src/core/network/usps_http_client.dart';
-import 'package:usps_v3_dart/src/features/tracking/models/tracking_models.dart';
-import 'package:usps_v3_dart/src/features/tracking/repository/tracking_repository.dart';
+import 'package:usps_v3_dart/usps_v3_dart.dart';
 
 class MockUspsHttpClient extends Mock implements UspsHttpClient {}
 
@@ -68,7 +65,7 @@ void main() {
 
         final TrackingResponse result = await repository.getTracking(
           '9400111899562537624656',
-          expand: 'DETAIL',
+          expand: TrackingExpand.detail,
         );
 
         expect(result.trackingNumber, equals('9400111899562537624656'));
@@ -106,7 +103,7 @@ void main() {
 
       final TrackingResponse result = await repository.getTracking(
         '9400111899562537624656',
-        expand: 'SUMMARY',
+        expand: TrackingExpand.summary,
       );
 
       expect(result.trackingNumber, equals('9400111899562537624656'));
@@ -126,16 +123,25 @@ void main() {
           (_) async => Response(
             data: 'invalid string payload',
             statusCode: 200,
-            requestOptions: RequestOptions(path: '/tracking/v3/tracking/123'),
+            requestOptions: RequestOptions(
+              path: '/tracking/v3/tracking/9400111899562537624123',
+            ),
           ),
         );
 
         expect(
-          () => repository.getTracking('123'),
+          () => repository.getTracking('9400111899562537624123'),
           throwsA(isA<UspsUnknownException>()),
         );
       },
     );
+
+    test('throws ArgumentError on invalid tracking number format', () async {
+      expect(
+        () => repository.getTracking('short'),
+        throwsA(isA<ArgumentError>()),
+      );
+    });
   });
 
   group('TrackingRepository getMultipleTracking', () {
@@ -165,7 +171,7 @@ void main() {
       final results = await repository.getMultipleTracking([
         '9400111899562537624656',
         '9400111899562537629999',
-      ], expand: 'SUMMARY');
+      ], expand: TrackingExpand.summary);
 
       expect(results.length, equals(2));
       expect(results[0].trackingNumber, equals('9400111899562537624656'));
@@ -183,17 +189,20 @@ void main() {
       ).thenAnswer(
         (_) async => Response(
           data: [
-            {'trackingNumber': '111', 'status': 'Delivered'},
-            {'trackingNumber': '222', 'status': 'In Transit'},
+            {'trackingNumber': '9400111899562537624111', 'status': 'Delivered'},
+            {'trackingNumber': '9400111899562537624222', 'status': 'In Transit'},
           ],
           statusCode: 200,
           requestOptions: RequestOptions(path: '/tracking/v3/tracking'),
         ),
       );
 
-      final results = await repository.getMultipleTracking(['111', '222']);
+      final results = await repository.getMultipleTracking([
+        '9400111899562537624111',
+        '9400111899562537624222',
+      ]);
       expect(results.length, equals(2));
-      expect(results.first.trackingNumber, equals('111'));
+      expect(results.first.trackingNumber, equals('9400111899562537624111'));
     });
 
     test('successfully parses single Map object in batch tracking', () async {
@@ -204,15 +213,15 @@ void main() {
         ),
       ).thenAnswer(
         (_) async => Response(
-          data: {'trackingNumber': '999', 'status': 'Accepted'},
+          data: {'trackingNumber': '9400111899562537624999', 'status': 'Accepted'},
           statusCode: 200,
           requestOptions: RequestOptions(path: '/tracking/v3/tracking'),
         ),
       );
 
-      final results = await repository.getMultipleTracking(['999']);
+      final results = await repository.getMultipleTracking(['9400111899562537624999']);
       expect(results.length, equals(1));
-      expect(results.first.trackingNumber, equals('999'));
+      expect(results.first.trackingNumber, equals('9400111899562537624999'));
     });
 
     test('throws UspsUnknownException on unexpected batch tracking response', () async {
@@ -230,8 +239,15 @@ void main() {
       );
 
       expect(
-        () => repository.getMultipleTracking(['999']),
+        () => repository.getMultipleTracking(['9400111899562537624999']),
         throwsA(isA<UspsUnknownException>()),
+      );
+    });
+
+    test('throws ArgumentError when any tracking number in batch is invalid', () async {
+      expect(
+        () => repository.getMultipleTracking(['9400111899562537624999', 'bad_id']),
+        throwsA(isA<ArgumentError>()),
       );
     });
   });

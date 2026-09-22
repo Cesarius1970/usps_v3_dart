@@ -13,8 +13,8 @@ RateRequest _$RateRequestFromJson(Map<String, dynamic> json) => RateRequest(
   length: (json['length'] as num?)?.toDouble(),
   width: (json['width'] as num?)?.toDouble(),
   height: (json['height'] as num?)?.toDouble(),
-  mailClass: json['mailClass'] as String?,
-  priceType: json['priceType'] as String?,
+  mailClass: $enumDecodeNullable(_$UspsMailClassEnumMap, json['mailClass']),
+  priceType: $enumDecodeNullable(_$PriceTypeEnumMap, json['priceType']),
   mailingDate: json['mailingDate'] as String?,
   hasNonstandardFees: json['hasNonstandardFees'] as bool?,
 );
@@ -27,11 +27,25 @@ Map<String, dynamic> _$RateRequestToJson(RateRequest instance) =>
       'length': ?instance.length,
       'width': ?instance.width,
       'height': ?instance.height,
-      'mailClass': ?instance.mailClass,
-      'priceType': ?instance.priceType,
+      'mailClass': ?_$UspsMailClassEnumMap[instance.mailClass],
+      'priceType': ?_$PriceTypeEnumMap[instance.priceType],
       'mailingDate': ?instance.mailingDate,
       'hasNonstandardFees': ?instance.hasNonstandardFees,
     };
+
+const _$UspsMailClassEnumMap = {
+  UspsMailClass.priorityMail: 'PRIORITY_MAIL',
+  UspsMailClass.priorityMailExpress: 'PRIORITY_MAIL_EXPRESS',
+  UspsMailClass.groundAdvantage: 'USPS_GROUND_ADVANTAGE',
+  UspsMailClass.mediaMail: 'MEDIA_MAIL',
+  UspsMailClass.libraryMail: 'LIBRARY_MAIL',
+};
+
+const _$PriceTypeEnumMap = {
+  PriceType.retail: 'RETAIL',
+  PriceType.commercial: 'COMMERCIAL',
+  PriceType.contract: 'CONTRACT',
+};
 
 RateFee _$RateFeeFromJson(Map<String, dynamic> json) => RateFee(
   feeName: json['feeName'] as String?,

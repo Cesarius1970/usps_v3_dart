@@ -1,5 +1,6 @@
 import 'package:json_annotation/json_annotation.dart';
 
+import '../../../core/enums/usps_enums.dart';
 import '../../addresses/models/address_models.dart';
 
 part 'shipping_models.g.dart';
@@ -25,14 +26,14 @@ class LabelRequest {
   /// Package height in inches.
   final double? height;
 
-  /// Mail class (e.g. "PRIORITY_MAIL", "PRIORITY_MAIL_EXPRESS", "USPS_GROUND_ADVANTAGE").
-  final String? mailClass;
+  /// Mail class (e.g. [UspsMailClass.priorityMail], [UspsMailClass.groundAdvantage]).
+  final UspsMailClass? mailClass;
 
   /// Description of package contents.
   final String? packageDescription;
 
-  /// Format of the returned label image (e.g. "PDF", "PNG", "ZPL203", "ZPL300").
-  final String imageType;
+  /// Format of the returned label image.
+  final LabelImageType imageType;
 
   /// Optional USPS Label Broker ID.
   final String? labelBrokerId;
@@ -47,7 +48,7 @@ class LabelRequest {
     this.height,
     this.mailClass,
     this.packageDescription,
-    this.imageType = 'PDF',
+    this.imageType = LabelImageType.pdf,
     this.labelBrokerId,
   });
 

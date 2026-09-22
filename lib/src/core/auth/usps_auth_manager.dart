@@ -84,6 +84,11 @@ class UspsAuthManager {
     _cachedToken = null;
   }
 
+  /// Closes the internal authentication HTTP client and releases resources.
+  void close({bool force = false}) {
+    _authDio.close(force: force);
+  }
+
   /// Internal method to request a new OAuth 2.0 token from the USPS token endpoint.
   Future<OAuthToken> _fetchToken() async {
     try {

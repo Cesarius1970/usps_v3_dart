@@ -98,6 +98,42 @@ UspsException _transformDioException(DioException e)
 
 ---
 
+### 2.4. Algoritmo de Reintentos con Backoff Exponencial (`UspsRetryInterceptor`)
+- **Archivo:** [`lib/src/core/network/usps_retry_interceptor.dart`](file:///home/cesar/Proyectos/Dart/usps_v3_dart/lib/src/core/network/usps_retry_interceptor.dart)
+
+Gestiona la resiliencia de la red reintentando automáticamente solicitudes idempotentes (`GET`, `HEAD`, `OPTIONS`) ante fallos transitorios:
+- **Condiciones de Reintento:** Códigos de estado HTTP `429 (Too Many Requests)`, `500`, `502`, `503`, `504`, y errores de socket/timeout (`connectionTimeout`, `sendTimeout`, `receiveTimeout`, `connectionError`).
+- **Fórmula de Retroceso Exponencial:**
+  $$\text{Delay} = \text{initialDelay} \times (\text{backoffMultiplier})^{\text{attempt}}$$
+- Al completarse el reintento exitosamente, resuelve la solicitud de manera transparente mediante `handler.resolve(response)`. Si excede `maxRetries`, propaga el error original.
+
+---
+
+### 2.5. Logging Seguro con Ofuscación de Credenciales (`UspsLogInterceptor`)
+- **Archivo:** [`lib/src/core/network/usps_log_interceptor.dart`](file:///home/cesar/Proyectos/Dart/usps_v3_dart/lib/src/core/network/usps_log_interceptor.dart)
+
+Permite auditoría y depuración en consola en entornos de desarrollo y producción protegiendo información confidencial:
+- **Encabezados:** Detecta `Authorization` y enmascara su contenido como `Bearer [REDACTED]`.
+- **Payloads:** Filtra recursivamente claves sensibles como `client_secret` y `access_token` sustituyéndolas por `[REDACTED]`.
+- **Salida:** Configurable con un delegado `logPrint: void Function(String message)`.
+
+---
+
+### 2.6. Validadores en el Cliente y Tipado Fuerte (`UspsValidators`, `UspsMailClass`, `LabelImageType`, `PriceType`)
+- **Archivos:** [`lib/src/core/utils/usps_validators.dart`](file:///home/cesar/Proyectos/Dart/usps_v3_dart/lib/src/core/utils/usps_validators.dart), [`lib/src/core/enums/usps_enums.dart`](file:///home/cesar/Proyectos/Dart/usps_v3_dart/lib/src/core/enums/usps_enums.dart)
+
+- **Validación Temprana:** Comprueba formato de códigos postales de 5 dígitos y códigos de rastreo (10 a 34 caracteres alfanuméricos) antes de emitir la llamada HTTP, ahorrando ancho de banda y cuota de API.
+- **Tipado Fuerte:** Reemplaza cadenas de texto no tipadas por enumeraciones fuertemente tipadas en solicitudes de precios (`RateRequest`) y generación de etiquetas (`LabelRequest`).
+
+---
+
+### 2.7. Ciclo de Vida y Liberación de Conexiones (`close()`)
+- **Archivos:** [`lib/src/usps_client.dart`](file:///home/cesar/Proyectos/Dart/usps_v3_dart/lib/src/usps_client.dart), [`lib/src/core/network/usps_http_client.dart`](file:///home/cesar/Proyectos/Dart/usps_v3_dart/lib/src/core/network/usps_http_client.dart), [`lib/src/core/auth/usps_auth_manager.dart`](file:///home/cesar/Proyectos/Dart/usps_v3_dart/lib/src/core/auth/usps_auth_manager.dart)
+
+Expone el método `close({bool force = false})` para cerrar de forma determinista los pools de sockets HTTP subyacentes tanto del cliente principal como del cliente aislado de autenticación, evitando fugas de memoria y descriptores en servidores backend (Dart Frog, Serverpod).
+
+---
+
 ## 3. Estructura de Directorios del Código Fuente
 
 ```
