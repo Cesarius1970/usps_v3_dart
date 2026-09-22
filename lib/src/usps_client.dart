@@ -6,14 +6,18 @@ import 'core/network/usps_log_interceptor.dart';
 import 'core/network/usps_retry_interceptor.dart';
 import 'features/addresses/repository/addresses_repository.dart';
 import 'features/locations/repository/locations_repository.dart';
+import 'features/pickup/repository/pickup_repository.dart';
 import 'features/pricing/repository/pricing_repository.dart';
+import 'features/scan_forms/repository/scan_forms_repository.dart';
+import 'features/service_standards/repository/service_standards_repository.dart';
 import 'features/shipping/repository/shipping_repository.dart';
 import 'features/tracking/repository/tracking_repository.dart';
 
 /// Central Facade client for accessing all USPS REST APIs (v3).
 ///
 /// Handles OAuth 2.0 token lifecycle automatically and provides strongly-typed
-/// access to tracking, addresses, locations, pricing, and shipping domains.
+/// access to tracking, addresses, locations, pricing, shipping, carrier pickups,
+/// service standards, and SCAN forms.
 class UspsClient {
   /// Low-level HTTP client configured with base URL, timeouts, and auth interceptors.
   final UspsHttpClient httpClient;
@@ -35,6 +39,15 @@ class UspsClient {
 
   /// Shipping label generation and cancellation repository.
   final ShippingRepository shipping;
+
+  /// Carrier pickup scheduling, inquiries, and management repository.
+  final CarrierPickupRepository pickup;
+
+  /// Delivery benchmark estimates and service standards repository.
+  final ServiceStandardsRepository serviceStandards;
+
+  /// PS Form 5630 SCAN Form manifest generation repository.
+  final ScanFormsRepository scanForms;
 
   /// Creates a new [UspsClient] with the given USPS Developer Portal credentials.
   ///
@@ -107,6 +120,9 @@ class UspsClient {
       locations: LocationsRepository(httpClient),
       pricing: PricingRepository(httpClient),
       shipping: ShippingRepository(httpClient),
+      pickup: CarrierPickupRepository(httpClient),
+      serviceStandards: ServiceStandardsRepository(httpClient),
+      scanForms: ScanFormsRepository(httpClient),
     );
   }
 
@@ -119,6 +135,9 @@ class UspsClient {
     required this.locations,
     required this.pricing,
     required this.shipping,
+    required this.pickup,
+    required this.serviceStandards,
+    required this.scanForms,
   });
 
   /// Closes underlying HTTP clients and releases active network connections.

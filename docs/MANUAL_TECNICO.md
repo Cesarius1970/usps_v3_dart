@@ -1,6 +1,6 @@
 # Manual Técnico de Arquitectura y Algoritmos: `usps_v3_dart`
 
-> **Versión del SDK:** 1.1.0  
+> **Versión del SDK:** 1.2.0  
 > **Plataforma Objetivo:** Dart 3.12+ / Flutter  
 > **API de USPS Soportada:** USPS REST APIs (v3) (`developer.usps.com`)  
 > **Última Actualización:** 2026-09-22
@@ -18,25 +18,25 @@ El SDK **`usps_v3_dart`** es una librería cliente en Dart fuertemente tipada, m
 4. **Manejo Transparente de Fallos:** El cliente gestiona el ciclo de vida del token OAuth 2.0 y el refresco transparente ante errores 401 sin exponer la complejidad al desarrollador.
 
 ```
-┌────────────────────────────────────────────────────────┐
-│                      UspsClient                        │
-│                   (Fachada Central)                    │
-└──────┬──────────────┬─────────────┬─────────────┬──────┘
-       │              │             │             │
-┌──────▼──────┐┌──────▼──────┐┌─────▼──────┐┌─────▼──────┐
-│  Tracking   ││  Addresses  ││  Locations ││  Shipping  │ ... (Pricing)
-│ Repository  ││ Repository  ││ Repository ││ Repository │
-└──────┬──────┘└──────┬──────┘└─────┬──────┘└─────┬──────┘
-       │              │             │             │
-       └──────────────┴──────┬──────┴─────────────┘
-                             │
-                   ┌─────────▼────────┐
-                   │  UspsHttpClient  │  (Dio + Interceptors)
-                   └─────────┬────────┘
-                             │
-                   ┌─────────▼────────┐
-                   │  UspsAuthManager │  (OAuth 2.0 + Cache)
-                   └──────────────────┘
+┌────────────────────────────────────────────────────────────────────────────────────────┐
+│                                       UspsClient                                       │
+│                                   (Fachada Central)                                    │
+└──────┬────────────┬────────────┬────────────┬────────────┬────────────┬────────────┬───────┘
+       │            │            │            │            │            │            │
+┌──────▼─────┐┌─────▼──────┐┌────▼───────┐┌───▼────────┐┌──▼────────┐┌──▼────────┐┌─▼────────┐
+│  Tracking  ││ Addresses  ││ Locations  ││  Pricing   ││  Shipping  ││   Pickup   ││ Standards│ ... (ScanForms)
+│ Repository ││ Repository ││ Repository ││ Repository ││ Repository ││ Repository ││Repository│
+└──────┬─────┘└─────┬──────┘└────┬───────┘└───┬────────┘└──┬────────┘└──┬────────┘└─┬────────┘
+       │            │            │            │            │            │            │
+       └────────────┴────────────┴─────┬──────┴────────────┴────────────┴────────────┘
+                                       │
+                             ┌─────────▼────────┐
+                             │  UspsHttpClient  │  (Dio + Interceptors: Retry, Auth, Log)
+                             └─────────┬────────┘
+                                       │
+                             ┌─────────▼────────┐
+                             │  UspsAuthManager │  (OAuth 2.0 + Cache)
+                             └──────────────────┘
 ```
 
 ---
@@ -134,6 +134,41 @@ Expone el método `close({bool force = false})` para cerrar de forma determinist
 
 ---
 
+### 2.8. Programación y Gestión de Recolecciones (`CarrierPickupRepository`)
+- **Archivos:** [`lib/src/features/pickup/repository/pickup_repository.dart`](file:///home/cesar/Proyectos/Dart/usps_v3_dart/lib/src/features/pickup/repository/pickup_repository.dart), [`lib/src/features/pickup/models/pickup_models.dart`](file:///home/cesar/Proyectos/Dart/usps_v3_dart/lib/src/features/pickup/models/pickup_models.dart)
+
+Permite gestionar el ciclo de recolección de paquetes por el cartero postal:
+1. **Comprobación de Elegibilidad (`checkEligibility`):** Valida si la dirección física cuenta con servicio de recolección domiciliaria antes de agendar.
+2. **Creación (`schedulePickup`):** Agenda la recolección para una fecha determinada especificando ubicación del paquete (`packageLocation`) e instrucciones especiales.
+3. **Consulta, Modificación y Cancelación (`getPickup`, `updatePickup`, `cancelPickup`):** Controla el estado y cancela peticiones usando el número de confirmación emitido por USPS.
+
+---
+
+### 2.9. Tiempos de Tránsito y Estándares de Entrega (`ServiceStandardsRepository`)
+- **Archivos:** [`lib/src/features/service_standards/repository/service_standards_repository.dart`](file:///home/cesar/Proyectos/Dart/usps_v3_dart/lib/src/features/service_standards/repository/service_standards_repository.dart), [`lib/src/features/service_standards/models/service_standards_models.dart`](file:///home/cesar/Proyectos/Dart/usps_v3_dart/lib/src/features/service_standards/models/service_standards_models.dart)
+
+Calcula los días estimados de entrega y fecha de llegada esperada entre cualquier par de códigos postales de origen y destino en EE.UU.:
+- Soporta integración con [`UspsMailClass`](file:///home/cesar/Proyectos/Dart/usps_v3_dart/lib/src/core/enums/usps_enums.dart) o identificadores de clase personalizados.
+- Valida anticipadamente los códigos postales usando [`UspsValidators`](file:///home/cesar/Proyectos/Dart/usps_v3_dart/lib/src/core/utils/usps_validators.dart).
+
+---
+
+### 2.10. Manifiestos Diarios SCAN Form PS 5630 (`ScanFormsRepository`)
+- **Archivos:** [`lib/src/features/scan_forms/repository/scan_forms_repository.dart`](file:///home/cesar/Proyectos/Dart/usps_v3_dart/lib/src/features/scan_forms/repository/scan_forms_repository.dart), [`lib/src/features/scan_forms/models/scan_form_models.dart`](file:///home/cesar/Proyectos/Dart/usps_v3_dart/lib/src/features/scan_forms/models/scan_form_models.dart)
+
+Consolida múltiples paquetes y etiquetas generadas durante el día en un único código de barras maestro (PS Form 5630 SCAN Form). Al momento de la entrega o recolección, el cartero escanea únicamente la hoja de manifiesto y todos los paquetes individuales quedan aceptados simultáneamente en la red de rastreo de USPS.
+
+---
+
+### 2.11. Verificación Criptográfica de Webhooks (`UspsWebhookVerifier`)
+- **Archivo:** [`lib/src/core/utils/usps_webhook_verifier.dart`](file:///home/cesar/Proyectos/Dart/usps_v3_dart/lib/src/core/utils/usps_webhook_verifier.dart)
+
+Facilita a aplicaciones backend en Dart (Shelf, Dart Frog, Serverpod) validar la autenticidad e integridad de las notificaciones HTTP POST enviadas por USPS:
+- **Algoritmo:** HMAC-SHA256 calculado a partir del cuerpo crudo del mensaje y la clave secreta compartida.
+- **Comparación en Tiempo Constante:** Implementa un bucle bit a bit (`sigBytes[i] ^ compBytes[i]`) sin salida temprana, mitigando vulnerabilidades a ataques de canal lateral basados en análisis de tiempo (*timing attacks*).
+
+---
+
 ## 3. Estructura de Directorios del Código Fuente
 
 ```
@@ -143,31 +178,20 @@ lib/
     ├── usps_client.dart              # Fachada central (UspsClient)
     ├── core/                         # Infraestructura transversal
     │   ├── auth/                     # Autenticación y tokens OAuth 2.0
-    │   │   ├── models/oauth_token.dart
-    │   │   └── usps_auth_manager.dart
+    │   ├── enums/                    # Enums tipados (UspsMailClass, etc.)
     │   ├── environment/              # Definición de entornos Sandbox y Prod
-    │   │   └── usps_environment.dart
     │   ├── exceptions/               # Jerarquía de errores UspsException
-    │   │   └── usps_exceptions.dart
-    │   └── network/                  # Cliente HTTP Dio y sus interceptores
-    │       ├── usps_auth_interceptor.dart
-    │       └── usps_http_client.dart
+    │   ├── network/                  # Cliente HTTP Dio y sus interceptores (Auth, Retry, Log)
+    │   └── utils/                    # Validadores y Verificador de Webhooks
     └── features/                     # Dominios de negocio de USPS
         ├── addresses/                # Validación y ZIP code lookup
-        │   ├── models/address_models.dart
-        │   └── repository/addresses_repository.dart
         ├── locations/                # Búsqueda de oficinas postales
-        │   ├── models/location_models.dart
-        │   └── repository/locations_repository.dart
+        ├── pickup/                   # Recolección a domicilio (Carrier Pickup)
         ├── pricing/                  # Cálculo de tarifas de franqueo
-        │   ├── models/pricing_models.dart
-        │   └── repository/pricing_repository.dart
+        ├── scan_forms/               # Manifiestos consolidados (PS Form 5630)
+        ├── service_standards/        # Estándares de entrega y tiempos de tránsito
         ├── shipping/                 # Generación y cancelación de etiquetas
-        │   ├── models/shipping_models.dart
-        │   └── repository/shipping_repository.dart
-        └── tracking/                 # Rastreo de paquetes individual y por lote
-            ├── models/tracking_models.dart
-            └── repository/tracking_repository.dart
+        └── tracking/                 # Rastreo de paquetes y Proof of Delivery (POD)
 ```
 
 ---
@@ -178,6 +202,7 @@ lib/
 | :--- | :--- | :--- | :--- |
 | **TrackingRepository** | `/tracking/v3/tracking/{trackingNumber}` | `GET` | Consulta el historial completo o resumen de un paquete. |
 | **TrackingRepository** | `/tracking/v3/tracking` | `GET` | Consulta masiva por lotes (hasta 30 números de guía). |
+| **TrackingRepository** | `/tracking/v3/tracking/{trackingNumber}/proof-of-delivery` | `POST` | Solicita carta o foto oficial de entrega con firma (POD). |
 | **AddressesRepository** | `/addresses/v3/address` | `GET` | Estandariza una dirección y asigna ZIP+4. |
 | **AddressesRepository** | `/addresses/v3/city-state` | `GET` | Obtiene ciudad y estado a partir de un código postal. |
 | **AddressesRepository** | `/addresses/v3/zipcode` | `GET` | Busca el código postal a partir de calle y ciudad/estado. |
@@ -185,6 +210,15 @@ lib/
 | **PricingRepository** | `/prices/v3/base-rates/search` | `POST` | Cotiza tarifas base según peso, dimensiones y destino. |
 | **ShippingRepository** | `/labels/v3/label` | `POST` | Genera una etiqueta de envío con código de barras y tarifa. |
 | **ShippingRepository** | `/labels/v3/label/{trackingNumber}` | `DELETE` | Cancela una etiqueta no utilizada y solicita reembolso. |
+| **CarrierPickupRepository** | `/pickup/v3/carrier-pickup/eligibility` | `GET` | Verifica elegibilidad de una dirección para recolección. |
+| **CarrierPickupRepository** | `/pickup/v3/carrier-pickup` | `POST` | Programa una nueva recolección a domicilio con el cartero. |
+| **CarrierPickupRepository** | `/pickup/v3/carrier-pickup/{id}` | `GET` | Consulta los detalles de una recolección programada. |
+| **CarrierPickupRepository** | `/pickup/v3/carrier-pickup/{id}` | `PUT` | Modifica fecha o paquetes de una recolección existente. |
+| **CarrierPickupRepository** | `/pickup/v3/carrier-pickup/{id}` | `DELETE` | Cancela una recolección programada con USPS. |
+| **ServiceStandardsRepository** | `/service-standards/v3/estimates` | `GET` | Estima fecha y días de tránsito entre dos códigos postales. |
+| **ServiceStandardsRepository** | `/service-standards/v3/standards` | `GET` | Obtiene estándares y compromisos de entrega por clase postal. |
+| **ScanFormsRepository** | `/scan-forms/v3/scan-form` | `POST` | Genera manifiesto consolidado PS Form 5630 (código maestro). |
+| **UspsWebhookVerifier** | *(Local Utility)* | `HMAC-SHA256` | Verificación en tiempo constante de firmas webhooks. |
 
 ---
 

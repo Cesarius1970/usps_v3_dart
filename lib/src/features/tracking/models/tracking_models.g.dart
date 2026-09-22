@@ -79,3 +79,45 @@ Map<String, dynamic> _$TrackingResponseToJson(TrackingResponse instance) =>
       'serviceTypeCode': instance.serviceTypeCode,
       'trackingEvents': instance.trackingEvents.map((e) => e.toJson()).toList(),
     };
+
+ProofOfDeliveryRequest _$ProofOfDeliveryRequestFromJson(
+  Map<String, dynamic> json,
+) => ProofOfDeliveryRequest(
+  uniqueMailPieceId: json['uniqueMailPieceID'] as String?,
+  mailPieceIntakeDate: json['mailPieceIntakeDate'] as String?,
+  tableCode: json['tableCode'] as String?,
+  requestType: json['requestType'] as String? ?? 'email',
+  firstName: json['firstName'] as String?,
+  lastName: json['lastName'] as String?,
+  email:
+      (json['email'] as List<dynamic>?)?.map((e) => e as String).toList() ??
+      const [],
+  faxNumber: json['faxNumber'] as String?,
+);
+
+Map<String, dynamic> _$ProofOfDeliveryRequestToJson(
+  ProofOfDeliveryRequest instance,
+) => <String, dynamic>{
+  'uniqueMailPieceID': ?instance.uniqueMailPieceId,
+  'mailPieceIntakeDate': ?instance.mailPieceIntakeDate,
+  'tableCode': ?instance.tableCode,
+  'requestType': instance.requestType,
+  'firstName': ?instance.firstName,
+  'lastName': ?instance.lastName,
+  'email': instance.email,
+  'faxNumber': ?instance.faxNumber,
+};
+
+ProofOfDeliveryResponse _$ProofOfDeliveryResponseFromJson(
+  Map<String, dynamic> json,
+) => ProofOfDeliveryResponse(
+  success: json['success'] as bool,
+  message: json['message'] as String?,
+);
+
+Map<String, dynamic> _$ProofOfDeliveryResponseToJson(
+  ProofOfDeliveryResponse instance,
+) => <String, dynamic>{
+  'success': instance.success,
+  'message': ?instance.message,
+};

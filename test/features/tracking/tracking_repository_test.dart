@@ -251,4 +251,99 @@ void main() {
       );
     });
   });
+
+  group('TrackingRepository requestProofOfDelivery', () {
+    const podRequest = ProofOfDeliveryRequest(
+      uniqueMailPieceId: 'UMP123',
+      mailPieceIntakeDate: '2026-09-20',
+      tableCode: 'T',
+      requestType: 'email',
+      firstName: 'John',
+      lastName: 'Smith',
+      email: ['john.smith@example.com'],
+    );
+
+    test('successfully requests proof of delivery with JSON response', () async {
+      when(
+        () => mockHttpClient.post<dynamic>(
+          '/tracking/v3/tracking/9400111899562537624123/proof-of-delivery',
+          data: any<dynamic>(named: 'data'),
+        ),
+      ).thenAnswer(
+        (_) async => Response(
+          data: {'message': 'Proof of delivery email queued'},
+          statusCode: 200,
+          requestOptions: RequestOptions(
+            path: '/tracking/v3/tracking/9400111899562537624123/proof-of-delivery',
+          ),
+        ),
+      );
+
+      final response = await repository.requestProofOfDelivery(
+        '9400111899562537624123',
+        podRequest,
+      );
+
+      expect(response.success, isTrue);
+      expect(response.message, equals('Proof of delivery email queued'));
+    });
+
+    test('handles 202 Accepted response without map message', () async {
+      when(
+        () => mockHttpClient.post<dynamic>(
+          '/tracking/v3/tracking/9400111899562537624123/proof-of-delivery',
+          data: any<dynamic>(named: 'data'),
+        ),
+      ).thenAnswer(
+        (_) async => Response(
+          data: 'Accepted',
+          statusCode: 202,
+          requestOptions: RequestOptions(
+            path: '/tracking/v3/tracking/9400111899562537624123/proof-of-delivery',
+          ),
+        ),
+      );
+
+      final response = await repository.requestProofOfDelivery(
+        '9400111899562537624123',
+        podRequest,
+      );
+
+      expect(response.success, isTrue);
+      expect(response.message, equals('Proof of delivery requested successfully'));
+    });
+
+    test('returns success = false on HTTP error status', () async {
+      when(
+        () => mockHttpClient.post<dynamic>(
+          '/tracking/v3/tracking/9400111899562537624123/proof-of-delivery',
+          data: any<dynamic>(named: 'data'),
+        ),
+      ).thenAnswer(
+        (_) async => Response(
+          data: {'message': 'Not eligible'},
+          statusCode: 400,
+          requestOptions: RequestOptions(
+            path: '/tracking/v3/tracking/9400111899562537624123/proof-of-delivery',
+          ),
+        ),
+      );
+
+      final response = await repository.requestProofOfDelivery(
+        '9400111899562537624123',
+        podRequest,
+      );
+
+      expect(response.success, isFalse);
+      expect(response.message, equals('Not eligible'));
+    });
+
+    test('throws ArgumentError on invalid tracking number', () {
+      expect(
+        () => repository.requestProofOfDelivery('invalid-num', podRequest),
+        throwsArgumentError,
+      );
+    });
+  });
 }
+

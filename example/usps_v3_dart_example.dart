@@ -67,6 +67,38 @@ void main() async {
     for (final loc in locations.locations) {
       print('- ${loc.locationName} (${loc.streetAddress}, ${loc.city})');
     }
+
+    // 6. Carrier Pickup Eligibility
+    print('\n[5] Checking Carrier Pickup Eligibility...');
+    final pickupEligibility = await usps.pickup.checkEligibility(
+      streetAddress: '475 L\'Enfant Plaza SW',
+      zipCode: '20260',
+    );
+    print('Eligible for pickup: ${pickupEligibility.eligible}');
+
+    // 7. Service Standards Estimates
+    print('\n[6] Estimating Service Standards...');
+    final estimate = await usps.serviceStandards.getEstimates(
+      originZipCode: '20260',
+      destinationZipCode: '78701',
+      acceptanceDate: '2026-09-25',
+      mailClass: UspsMailClass.priorityMail,
+    );
+    print(
+      'Service Standard: ${estimate.serviceStandard?.deliveryDays ?? "N/A"} (${estimate.serviceStandard?.daysToDelivery ?? 0} days)',
+    );
+
+    // 8. Webhook Verification
+    print('\n[7] Verifying Webhook Signature...');
+    final isValidWebhook = UspsWebhookVerifier.verify(
+      payload: '{"event":"DELIVERED"}',
+      signature: UspsWebhookVerifier.computeSignature(
+        payload: '{"event":"DELIVERED"}',
+        secretKey: 'sample-secret',
+      ),
+      secretKey: 'sample-secret',
+    );
+    print('Webhook signature verified: $isValidWebhook');
   } on UspsApiException catch (e) {
     print('USPS API Error (${e.statusCode}): ${e.message}');
   } on UspsAuthException catch (e) {
@@ -76,7 +108,7 @@ void main() async {
   } on UspsException catch (e) {
     print('General USPS SDK Error: ${e.message}');
   } finally {
-    // 6. Dispose client and release network resources
+    // 9. Dispose client and release network resources
     usps.close();
   }
 }

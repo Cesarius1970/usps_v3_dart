@@ -83,4 +83,37 @@ class TrackingRepository {
           'Unexpected batch payload format received from tracking endpoint',
     );
   }
+
+  /// Requests official Proof of Delivery (POD) for a delivered package by its [trackingNumber].
+  ///
+  /// The request sends a letter with signature image and recipient details to the specified email(s).
+  Future<ProofOfDeliveryResponse> requestProofOfDelivery(
+    String trackingNumber,
+    ProofOfDeliveryRequest request,
+  ) async {
+    final validTracking =
+        UspsValidators.requireValidTrackingNumber(trackingNumber);
+    final response = await _client.post<dynamic>(
+      '/tracking/v3/tracking/$validTracking/proof-of-delivery',
+      data: request.toJson(),
+    );
+
+    final statusCode = response.statusCode;
+    final isSuccess =
+        statusCode != null && statusCode >= 200 && statusCode < 300;
+
+    final data = response.data;
+    if (data is Map<String, dynamic>) {
+      return ProofOfDeliveryResponse(
+        success: isSuccess,
+        message: data['message'] as String? ??
+            'Proof of delivery requested successfully',
+      );
+    }
+
+    return ProofOfDeliveryResponse(
+      success: isSuccess,
+      message: 'Proof of delivery requested successfully',
+    );
+  }
 }

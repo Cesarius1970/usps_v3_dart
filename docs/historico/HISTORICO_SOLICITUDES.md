@@ -216,3 +216,38 @@ Este documento registra de forma cronológica, numerada y secuencial todas las s
     - Commit con Conventional Commits: `chore(release): bump version to 1.1.0 and update release documentation`.
     - Creación y subida del tag Git `v1.1.0` a GitHub (`origin v1.1.0`) para disparar el flujo de GitHub Actions con OIDC (`.github/workflows/publish.yml`).
     - Ejecución de `dart pub publish --force` contra el backend de pub.dev.
+
+---
+
+### Interacción 14: Implementación de Nuevas Funcionalidades Recomendadas
+- **Fecha:** 2026-09-22T16:39:05-05:00
+- **Solicitud del Usuario:**
+  > "Procede com implementar las nuevas funcionalidades recomendadas"
+- **Respuesta y Acciones:**
+  - **Carrier Pickup API (`CarrierPickupRepository`):**
+    - Módulo creado en [`lib/src/features/pickup/`](file:///home/cesar/Proyectos/Dart/usps_v3_dart/lib/src/features/pickup/).
+    - Modelos serializables con `json_serializable`: [`PickupContact`](file:///home/cesar/Proyectos/Dart/usps_v3_dart/lib/src/features/pickup/models/pickup_models.dart#L7), [`PickupAddressInfo`](file:///home/cesar/Proyectos/Dart/usps_v3_dart/lib/src/features/pickup/models/pickup_models.dart#L36), [`PickupPackageItem`](file:///home/cesar/Proyectos/Dart/usps_v3_dart/lib/src/features/pickup/models/pickup_models.dart#L69), [`PickupLocationInstruction`](file:///home/cesar/Proyectos/Dart/usps_v3_dart/lib/src/features/pickup/models/pickup_models.dart#L92), [`CarrierPickupRequest`](file:///home/cesar/Proyectos/Dart/usps_v3_dart/lib/src/features/pickup/models/pickup_models.dart#L118), [`CarrierPickupUpdateRequest`](file:///home/cesar/Proyectos/Dart/usps_v3_dart/lib/src/features/pickup/models/pickup_models.dart#L154), [`CarrierPickupResponse`](file:///home/cesar/Proyectos/Dart/usps_v3_dart/lib/src/features/pickup/models/pickup_models.dart#L182), [`CarrierPickupEligibilityResponse`](file:///home/cesar/Proyectos/Dart/usps_v3_dart/lib/src/features/pickup/models/pickup_models.dart#L233).
+    - Operaciones: `checkEligibility()`, `schedulePickup()`, `getPickup()`, `updatePickup()`, `cancelPickup()`.
+  - **Service Standards API (`ServiceStandardsRepository`):**
+    - Módulo creado en [`lib/src/features/service_standards/`](file:///home/cesar/Proyectos/Dart/usps_v3_dart/lib/src/features/service_standards/).
+    - Modelos: [`ServiceStandardDetail`](file:///home/cesar/Proyectos/Dart/usps_v3_dart/lib/src/features/service_standards/models/service_standards_models.dart#L7), [`ServiceStandardsEstimate`](file:///home/cesar/Proyectos/Dart/usps_v3_dart/lib/src/features/service_standards/models/service_standards_models.dart#L38).
+    - Operaciones: `getEstimates()` y `getStandards()` con validación previa de códigos postales y soporte para enumeración `UspsMailClass`.
+  - **SCAN Forms API (`ScanFormsRepository`):**
+    - Módulo creado en [`lib/src/features/scan_forms/`](file:///home/cesar/Proyectos/Dart/usps_v3_dart/lib/src/features/scan_forms/).
+    - Modelos: [`ScanFormShipment`](file:///home/cesar/Proyectos/Dart/usps_v3_dart/lib/src/features/scan_forms/models/scan_form_models.dart#L7), [`ScanFormFromAddress`](file:///home/cesar/Proyectos/Dart/usps_v3_dart/lib/src/features/scan_forms/models/scan_form_models.dart#L31), [`ScanFormRequest`](file:///home/cesar/Proyectos/Dart/usps_v3_dart/lib/src/features/scan_forms/models/scan_form_models.dart#L74), [`ScanFormResponse`](file:///home/cesar/Proyectos/Dart/usps_v3_dart/lib/src/features/scan_forms/models/scan_form_models.dart#L131).
+    - Operación: `createScanForm()` para generación de manifiestos PS Form 5630 con validación de código de instalación.
+  - **Proof of Delivery (POD) en Tracking:**
+    - Modelos añadidos: [`ProofOfDeliveryRequest`](file:///home/cesar/Proyectos/Dart/usps_v3_dart/lib/src/features/tracking/models/tracking_models.dart#L145) y [`ProofOfDeliveryResponse`](file:///home/cesar/Proyectos/Dart/usps_v3_dart/lib/src/features/tracking/models/tracking_models.dart#L196).
+    - Método añadido en [`TrackingRepository.requestProofOfDelivery()`](file:///home/cesar/Proyectos/Dart/usps_v3_dart/lib/src/features/tracking/repository/tracking_repository.dart#L90) para solicitar la firma o foto de entrega oficial por email/fax.
+  - **Verificador Criptográfico de Webhooks (`UspsWebhookVerifier`):**
+    - Creado en [`lib/src/core/utils/usps_webhook_verifier.dart`](file:///home/cesar/Proyectos/Dart/usps_v3_dart/lib/src/core/utils/usps_webhook_verifier.dart).
+    - Cálculo de HMAC-SHA256 y comparación bit a bit en tiempo constante para mitigar ataques por canal lateral (*timing attacks*).
+  - **Fachada [`UspsClient`](file:///home/cesar/Proyectos/Dart/usps_v3_dart/lib/src/usps_client.dart):**
+    - Exposición de `client.pickup`, `client.serviceStandards` y `client.scanForms`.
+  - **Pruebas y Cobertura:**
+    - Se incrementó el número de pruebas a **140 tests unitarios (0 fallos)**.
+    - Se mantuvo una cobertura estricta del **100.00% (1158/1158 líneas ejecutables cubiertas)** en los 35 archivos de `lib/`.
+    - `dart analyze .` verificado con **0 advertencias / 0 errores**.
+  - **Documentación Técnica:**
+    - Actualizado [`docs/MANUAL_TECNICO.md`](file:///home/cesar/Proyectos/Dart/usps_v3_dart/docs/MANUAL_TECNICO.md) con las secciones de algoritmos 2.8, 2.9, 2.10 y 2.11 y la matriz de endpoints completa.
+

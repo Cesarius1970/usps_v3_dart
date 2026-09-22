@@ -139,3 +139,75 @@ class TrackingResponse {
   /// Serializes this tracking response into a JSON map.
   Map<String, dynamic> toJson() => _$TrackingResponseToJson(this);
 }
+
+/// Request payload to obtain official Proof of Delivery (POD) with signature or delivery photo.
+@JsonSerializable(includeIfNull: false)
+class ProofOfDeliveryRequest {
+  /// Unique identifier of the mail piece, if available.
+  @JsonKey(name: 'uniqueMailPieceID')
+  final String? uniqueMailPieceId;
+
+  /// Date when the piece was inducted/accepted (YYYY-MM-DD).
+  final String? mailPieceIntakeDate;
+
+  /// USPS internal table routing code.
+  final String? tableCode;
+
+  /// Delivery channel requested (e.g. "email" or "fax").
+  final String requestType;
+
+  /// Recipient's first name.
+  final String? firstName;
+
+  /// Recipient's last name.
+  final String? lastName;
+
+  /// Email addresses to receive the Proof of Delivery letter.
+  final List<String> email;
+
+  /// Destination fax number if requested by fax.
+  final String? faxNumber;
+
+  /// Creates a new [ProofOfDeliveryRequest] instance.
+  const ProofOfDeliveryRequest({
+    this.uniqueMailPieceId,
+    this.mailPieceIntakeDate,
+    this.tableCode,
+    this.requestType = 'email',
+    this.firstName,
+    this.lastName,
+    this.email = const [],
+    this.faxNumber,
+  });
+
+  /// Deserializes a JSON map into a [ProofOfDeliveryRequest].
+  factory ProofOfDeliveryRequest.fromJson(Map<String, dynamic> json) =>
+      _$ProofOfDeliveryRequestFromJson(json);
+
+  /// Serializes this request into a JSON map.
+  Map<String, dynamic> toJson() => _$ProofOfDeliveryRequestToJson(this);
+}
+
+/// Response returned from the USPS Proof of Delivery API endpoint.
+@JsonSerializable(includeIfNull: false)
+class ProofOfDeliveryResponse {
+  /// Whether the request was accepted by USPS.
+  final bool success;
+
+  /// Status code or confirmation message from the API.
+  final String? message;
+
+  /// Creates a new [ProofOfDeliveryResponse] instance.
+  const ProofOfDeliveryResponse({
+    required this.success,
+    this.message,
+  });
+
+  /// Deserializes a JSON map into a [ProofOfDeliveryResponse].
+  factory ProofOfDeliveryResponse.fromJson(Map<String, dynamic> json) =>
+      _$ProofOfDeliveryResponseFromJson(json);
+
+  /// Serializes this response into a JSON map.
+  Map<String, dynamic> toJson() => _$ProofOfDeliveryResponseToJson(this);
+}
+

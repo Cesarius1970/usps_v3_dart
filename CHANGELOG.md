@@ -1,5 +1,15 @@
 # Changelog
 
+## 1.2.0
+
+- Added **Carrier Pickup API** (`CarrierPickupRepository`): check pickup eligibility, schedule carrier pickups, retrieve, update, and cancel appointments.
+- Added **Service Standards API** (`ServiceStandardsRepository`): calculate delivery standards, benchmarks, and transit estimates between origin and destination ZIP codes.
+- Added **SCAN Forms API** (`ScanFormsRepository`): generate consolidated PS Form 5630 barcode manifests for bulk shipments.
+- Added **Proof of Delivery (POD)** in `TrackingRepository`: request official proof of delivery letter with digitized signature and delivery photo.
+- Added **Webhook Verification Utility** (`UspsWebhookVerifier`): HMAC-SHA256 signature verification with constant-time comparison against timing attacks.
+- Expanded facade client `UspsClient` to expose `pickup`, `serviceStandards`, and `scanForms`.
+- Added 38 new unit tests (140 total) maintaining 100.00% line coverage across all 35 library files.
+
 ## 1.1.0
 
 - Added strongly-typed enums for USPS APIs: `UspsMailClass`, `LabelImageType`, `PriceType`, and `TrackingExpand`.

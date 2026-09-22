@@ -21,6 +21,11 @@ A strongly-typed, production-ready Dart SDK for the official **USPS REST APIs (v
 - **Post Office & Facility Locator**: Search USPS facilities by ZIP code or geographic coordinates (`LocationsRepository`).
 - **Postage Rate Calculator**: Calculate domestic base rates and surcharges by weight, dimensions, and mail class (`PricingRepository`).
 - **Shipping Labels**: Generate domestic postage labels with barcodes in PDF, PNG, or ZPL formats (`ShippingRepository`).
+- **Carrier Pickup**: Check address eligibility, schedule, manage, and cancel home/office package pickups (`CarrierPickupRepository`).
+- **Service Standards**: Calculate delivery benchmarks, commitments, and transit estimates between ZIP codes (`ServiceStandardsRepository`).
+- **SCAN Forms (PS Form 5630)**: Create consolidated barcode manifests for high-volume daily pickups (`ScanFormsRepository`).
+- **Proof of Delivery (POD)**: Request official delivery letters with digitized signature and delivery photo (`TrackingRepository.requestProofOfDelivery`).
+- **Webhook Signature Verification**: Verify USPS webhook events with HMAC-SHA256 in constant-time comparison (`UspsWebhookVerifier`).
 - **Unified Error Handling**: Strongly-typed exception hierarchy (`UspsApiException`, `UspsAuthException`, `UspsNetworkException`, `UspsUnknownException`).
 
 ---
@@ -31,7 +36,7 @@ Add `usps_v3_dart` to your `pubspec.yaml`:
 
 ```yaml
 dependencies:
-  usps_v3_dart: ^1.1.0
+  usps_v3_dart: ^1.2.0
 ```
 
 Then run:

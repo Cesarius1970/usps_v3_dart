@@ -16,6 +16,9 @@ void main() {
       expect(client.locations, isA<LocationsRepository>());
       expect(client.pricing, isA<PricingRepository>());
       expect(client.shipping, isA<ShippingRepository>());
+      expect(client.pickup, isA<CarrierPickupRepository>());
+      expect(client.serviceStandards, isA<ServiceStandardsRepository>());
+      expect(client.scanForms, isA<ScanFormsRepository>());
     });
 
     test('instantiates with sandbox environment and custom timeouts', () {
